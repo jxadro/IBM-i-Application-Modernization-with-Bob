@@ -3,8 +3,10 @@
 # Build with Tobi
 # =============================================================================
 
-/QOpenSys/pkgs/bin/yum install tobi
-/QOpenSys/pkgs/bin/yum install python39
+export PATH=/QOpenSys/pkgs/bin:$PATH
+
+/QOpenSys/pkgs/bin/yum install -y tobi
+/QOpenSys/pkgs/bin/yum install -y python39
 system "CRTLIB LIB(SAMCO) TEXT('SAMCO Application')"
 cd ../SAMCO
 export lib1=SAMCO

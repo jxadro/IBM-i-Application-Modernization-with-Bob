@@ -11,20 +11,21 @@
 -- ============================================================================
 
 -- Clear existing data (optional - comment out if you want to keep existing data)
--- DELETE FROM ARTIPROV;
--- DELETE FROM DETORD;
--- DELETE FROM ORDER;
--- DELETE FROM ARTICLE;
--- DELETE FROM CUSTOMER;
--- DELETE FROM PROVIDER;
--- DELETE FROM FAMILLY;
--- DELETE FROM COUNTRY;
--- DELETE FROM PARAMETER WHERE PACODE = 'VAT';
+SET SCHEMA SAMCO;
+DELETE FROM ARTIPROV;
+DELETE FROM DETORD;
+DELETE FROM ORDER;
+DELETE FROM ARTICLE;
+DELETE FROM CUSTOMER;
+DELETE FROM PROVIDER;
+DELETE FROM FAMILLY;
+DELETE FROM COUNTRY;
+DELETE FROM PARAMETER;
 
 -- ============================================================================
 -- 1. COUNTRY Table - Country codes and names
 -- ============================================================================
-SET SCHEMA SAMCOn;
+SET SCHEMA SAMCO;
 INSERT INTO COUNTRY (COID, COUNTR, COISO, COISO5, COISO1) VALUES
 ('FR', 'France', 'FRA', '250', '33'),
 ('US', 'United States', 'USA', '840', '1'),

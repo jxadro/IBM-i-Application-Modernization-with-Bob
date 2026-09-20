@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Glosario de Campos</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.hero{padding:32px 40px 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted)}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;padding:16px 40px;background:#fff;border-bottom:1px solid var(--border);align-items:center}
+.filter-bar input{flex:1;min-width:220px;padding:7px 10px;border:1px solid var(--border);border-radius:2px;font-size:13px;background:var(--gray-1)}
+.filter-bar input:focus{outline:none;border-color:var(--accent)}
+.filter-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:2px;font-size:13px;background:var(--gray-1)}
+.counter{font-size:12px;color:var(--fg-muted);margin-left:auto}
+.results-wrap{padding:0 40px 40px}
+table{width:100%;border-collapse:collapse;margin-top:20px;background:#fff;border:1px solid var(--border)}
+th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;
+  background:var(--gray-1);border-bottom:2px solid var(--border);text-align:left;color:var(--fg-muted)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
+tr:hover td{background:#fafafa}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;white-space:nowrap}
+.badge-pk{background:#fff8e1;color:#f57f17;border:1px solid #ffe082;font-weight:700}
+.badge-fk{background:#e8f0f7;color:var(--accent);border:1px solid #b8d0e8}
+.badge-ent{background:#e8f0f7;color:var(--accent);border:1px solid #b8d0e8}
+.mono{font-family:var(--font-mono);font-size:12px}
+.pgm-list{font-family:var(--font-mono);font-size:11px;color:var(--fg-muted)}
+.empty{padding:40px;text-align:center;color:var(--fg-muted);font-size:13px}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border);margin-top:20px}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Glosario de Campos</span>
+  <a href="flujo_samco.html">← Flujo completo</a>
+</header>
+
+<div class="hero">
+  <h1>Glosario de Campos</h1>
+  <p>Diccionario completo de campos de ficheros físicos y tablas SQL de SAMCO. <strong id="total">0</strong> campos documentados.</p>
+</div>
+
+<div class="filter-bar">
+  <input type="text" id="txtSearch" placeholder="Buscar campo, descripción, valores o programa..." oninput="filtrar()">
+  <select id="selEnt" onchange="filtrar()">
+    <option value="">Todas las entidades</option>
+    <option value="ARTICLE">ARTICLE</option>
+    <option value="CUSTOMER">CUSTOMER</option>
+    <option value="ORDER">ORDER</option>
+    <option value="DETORD">DETORD</option>
+    <option value="FAMILLY">FAMILLY</option>
+    <option value="COUNTRY">COUNTRY</option>
+    <option value="PROVIDER">PROVIDER</option>
+    <option value="ARTIPROV">ARTIPROV</option>
+    <option value="PARAMETER">PARAMETER</option>
+  </select>
+  <select id="selTipo" onchange="filtrar()">
+    <option value="">Todos los tipos</option>
+    <option value="PK">Solo claves primarias (PK)</option>
+    <option value="FK">Solo claves foráneas (FK)</option>
+  </select>
+  <span class="counter" id="counter">— campos</span>
+</div>
+
+<div class="results-wrap">
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th>Entidad</th><th>Campo</th><th>Tipo IBM i</th><th>Descripción</th>
+        <th>Valores / Flags</th><th>Programas</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">No se encontraron campos con los filtros seleccionados.</div>
+</div>
+
+<footer>SAMCO · Glosario de Campos &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a> &nbsp;|&nbsp; <a href="diagrama_er.html">Diagrama ER</a></footer>
+
+<script src="campos_data.js"></script>
+<script>
+document.getElementById('total').textContent = CAMPOS.length;
+function filtrar(){
+  const txt = document.getElementById('txtSearch').value.toLowerCase();
+  const ent = document.getElementById('selEnt').value;
+  const tipo = document.getElementById('selTipo').value;
+  const res = CAMPOS.filter(c=>{
+    const hayTxt = !txt || [c.entidad,c.campo,c.desc,c.valores,...c.programas].join(' ').toLowerCase().includes(txt);
+    const hayEnt = !ent || c.entidad===ent;
+    const hayTipo = !tipo || (tipo==='PK'&&c.pk) || (tipo==='FK'&&c.fk);
+    return hayTxt && hayEnt && hayTipo;
+  });
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = res.map(c=>`
+    <tr>
+      <td><span class="badge badge-ent">${c.entidad}</span></td>
+      <td class="mono">${c.campo}${c.pk?'&nbsp;<span class="badge badge-pk">PK</span>':''}${c.fk?'&nbsp;<span class="badge badge-fk">FK</span>':''}</td>
+      <td class="mono">${c.tipo}</td>
+      <td>${c.desc}</td>
+      <td class="mono" style="font-size:11px;color:var(--fg-muted)">${c.valores}</td>
+      <td class="pgm-list">${c.programas.join(', ')}</td>
+    </tr>`).join('');
+  document.getElementById('counter').textContent = `${res.length} campo${res.length!==1?'s':''}`;
+  document.getElementById('empty').style.display = res.length?'none':'block';
+  document.getElementById('tabla').style.display = res.length?'':'none';
+}
+filtrar();
+</script>
+</body>
+</html>

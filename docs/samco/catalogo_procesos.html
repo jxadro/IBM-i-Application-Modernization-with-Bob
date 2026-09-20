@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Catálogo de Procesos Funcionales</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.hero{padding:32px 40px 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted)}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;padding:16px 40px;background:#fff;border-bottom:1px solid var(--border);align-items:center}
+.filter-bar input{flex:1;min-width:220px;padding:7px 10px;border:1px solid var(--border);border-radius:2px;font-size:13px;background:var(--gray-1)}
+.filter-bar input:focus{outline:none;border-color:var(--accent)}
+.filter-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:2px;font-size:13px;background:var(--gray-1)}
+.counter{font-size:12px;color:var(--fg-muted);margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;padding:24px 40px}
+.pf-card{background:#fff;border:1px solid var(--border);border-radius:2px;padding:16px 18px}
+.pf-card:hover{border-color:var(--border-strong);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.pf-id{font-family:var(--font-mono);font-size:11px;color:var(--accent);font-weight:700;margin-bottom:4px}
+.pf-mod{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;
+  border-radius:2px;background:#e8f0f7;border:1px solid #b8d0e8;color:var(--accent);margin-left:6px}
+.pf-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.pf-desc{font-size:12px;color:var(--fg-muted);margin-bottom:10px}
+.pf-section{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-muted);margin-bottom:4px;margin-top:10px}
+.tags-row{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-family:var(--font-mono);font-size:10px;padding:1px 6px;border-radius:2px;border:1px solid var(--gray-2);background:var(--gray-1)}
+.tag-pgm{background:#e8f0f7;border-color:#b8d0e8;color:var(--accent)}
+.tag-br{background:#f7ece8;border-color:#e8c4bc;color:var(--warn)}
+.tag-ent{background:#f0f7e8;border-color:#b8e8b8;color:#2e7d32}
+.empty{padding:40px;text-align:center;color:var(--fg-muted);font-size:13px}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border);margin-top:8px}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Catálogo de Procesos Funcionales</span>
+  <a href="flujo_samco.html">← Flujo completo</a>
+</header>
+
+<div class="hero">
+  <h1>Catálogo de Procesos Funcionales</h1>
+  <p>Listado exhaustivo de los <strong id="total">0</strong> procesos funcionales identificados en SAMCO.</p>
+</div>
+
+<div class="filter-bar">
+  <input type="text" id="txtSearch" placeholder="Buscar por ID, nombre, descripción, programa o entidad..." oninput="filtrar()">
+  <select id="selMod" onchange="filtrar()">
+    <option value="">Todos los módulos</option>
+    <option value="ORD">Pedidos (ORD)</option>
+    <option value="ART">Artículos (ART)</option>
+    <option value="CUS">Clientes (CUS)</option>
+    <option value="PRO">Proveedores (PRO)</option>
+    <option value="MAE">Datos Maestros (MAE)</option>
+    <option value="UTL">Utilidades (UTL)</option>
+  </select>
+  <span class="counter" id="counter">— resultados</span>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="empty" id="empty" style="display:none">No se encontraron procesos con los filtros seleccionados.</div>
+
+<footer>SAMCO · Catálogo de Procesos Funcionales &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a></footer>
+
+<script src="procesos_data.js"></script>
+<script>
+document.getElementById('total').textContent = PROCESOS.length;
+function filtrar(){
+  const txt = document.getElementById('txtSearch').value.toLowerCase();
+  const mod = document.getElementById('selMod').value;
+  const res = PROCESOS.filter(p=>{
+    const hayTxt = !txt || [p.id,p.nombre,p.desc,...p.programas,...p.entidades].join(' ').toLowerCase().includes(txt);
+    const hayMod = !mod || p.modulo===mod;
+    return hayTxt && hayMod;
+  });
+  const grid = document.getElementById('grid');
+  grid.innerHTML = res.map(p=>`
+    <div class="pf-card">
+      <div class="pf-id">${p.id}<span class="pf-mod">${p.modulo}</span></div>
+      <div class="pf-title">${p.nombre}</div>
+      <div class="pf-desc">${p.desc}</div>
+      <div class="pf-section">Programas IBM i</div>
+      <div class="tags-row">${p.programas.map(x=>`<span class="tag tag-pgm">${x}</span>`).join('')}</div>
+      ${p.reglas.length?`<div class="pf-section">Reglas de Negocio</div><div class="tags-row">${p.reglas.map(x=>`<span class="tag tag-br">${x}</span>`).join('')}</div>`:''}
+      <div class="pf-section">Entidades</div>
+      <div class="tags-row">${p.entidades.map(x=>`<span class="tag tag-ent">${x}</span>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('counter').textContent = `${res.length} resultado${res.length!==1?'s':''}`;
+  document.getElementById('empty').style.display = res.length?'none':'block';
+}
+filtrar();
+</script>
+</body>
+</html>

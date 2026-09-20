@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Flujo Funcional Completo</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;--gray-3:#d4d4d4;--gray-4:#b0b0b0;
+  --gray-5:#909090;--gray-6:#707070;--gray-7:#545454;--gray-8:#383838;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+/* HEADER */
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);letter-spacing:-.3px;color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+.site-header a:hover{border-bottom-color:var(--accent)}
+/* HERO */
+.hero{padding:40px 40px 24px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted);max-width:680px}
+/* FLOW */
+.flow-wrap{padding:24px 40px;border-bottom:1px solid var(--border);overflow-x:auto}
+.flow-scroll{display:flex;align-items:stretch;gap:0;min-width:max-content}
+.stage-box{position:relative;cursor:pointer;min-width:160px;max-width:180px;padding:18px 16px 16px;
+  border:1px solid var(--border);background:var(--gray-1);transition:all .15s}
+.stage-box:hover,.stage-box.active{border-color:var(--border-strong);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.stage-box .stage-id{font-size:10px;font-family:var(--font-mono);color:var(--fg-muted);margin-bottom:4px}
+.stage-box .stage-title{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:8px}
+.stage-box .stage-sub{font-size:11px;color:var(--fg-muted)}
+.stage-box .stage-link{display:inline-block;margin-top:10px;font-size:11px;color:var(--accent);text-decoration:none}
+.stage-box .stage-link:hover{text-decoration:underline}
+.arrow{display:flex;align-items:center;padding:0 6px;color:var(--gray-4);font-size:18px;flex-shrink:0}
+/* PANELS */
+.panels-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-bottom:1px solid var(--border)}
+.panel-col{padding:24px 28px;border-right:1px solid var(--border)}
+.panel-col:last-child{border-right:none}
+.panel-col h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);margin-bottom:12px}
+.panel-col p,.panel-col li{font-size:13px;color:var(--fg);line-height:1.6}
+.panel-col ul{list-style:none;padding:0}
+.panel-col ul li{padding:3px 0;border-bottom:1px solid var(--gray-1)}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;margin-right:4px}
+.badge-pf{background:#e8f0f7;color:var(--accent);border:1px solid #b8d0e8}
+.badge-br{background:#f7ece8;color:var(--warn);border:1px solid #e8c4bc}
+.badge-conf{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.badge-ncnf{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+/* BOTTOM PANEL */
+.bottom-panel{padding:20px 40px;background:#fff;border-bottom:1px solid var(--border)}
+.bottom-panel h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);margin-bottom:12px}
+.tags-row{display:flex;flex-wrap:wrap;gap:6px}
+.pgm-tag,.ent-tag{font-family:var(--font-mono);font-size:11px;padding:3px 8px;border-radius:2px;cursor:default}
+.pgm-tag{background:var(--gray-1);border:1px solid var(--gray-3);color:var(--fg)}
+.ent-tag{background:#e8f0f7;border:1px solid #b8d0e8;color:var(--accent)}
+/* NAV LINKS */
+.nav-links{display:flex;flex-wrap:wrap;gap:12px;padding:20px 40px;background:#fff;border-bottom:1px solid var(--border)}
+.nav-links a{font-size:12px;color:var(--accent);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:2px}
+.nav-links a:hover{border-color:var(--accent);background:#f0f7fa}
+/* FOOTER */
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Flujo Funcional Completo</span>
+  <a href="index.html">← Portal principal</a>
+</header>
+
+<div class="hero">
+  <h1>Flujo funcional: Gestión integral de negocio SAMCO</h1>
+  <p>Aplicación IBM i de gestión empresarial: pedidos, artículos, clientes, proveedores y datos maestros. Pasa el ratón sobre una etapa para ver su explicación. Haz clic para fijar programas y entidades implicados.</p>
+</div>
+
+<div class="flow-wrap">
+  <div class="flow-scroll" id="flowRow">
+    <div class="stage-box active" data-stage="s1" onclick="selectStage('s1')">
+      <div class="stage-id">Etapa 1</div>
+      <div class="stage-title">Gestión de Pedidos</div>
+      <div class="stage-sub">Creación, mantenimiento y procesamiento</div>
+      <a class="stage-link" href="etapa1_pedidos.html">Ver desarrollo →</a>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage-box" data-stage="s2" onclick="selectStage('s2')">
+      <div class="stage-id">Etapa 2</div>
+      <div class="stage-title">Gestión de Artículos</div>
+      <div class="stage-sub">Catálogo, precios, stock y familias</div>
+      <a class="stage-link" href="etapa2_articulos.html">Ver desarrollo →</a>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage-box" data-stage="s3" onclick="selectStage('s3')">
+      <div class="stage-id">Etapa 3</div>
+      <div class="stage-title">Gestión de Clientes</div>
+      <div class="stage-sub">Alta, datos de contacto y crédito</div>
+      <a class="stage-link" href="etapa3_clientes.html">Ver desarrollo →</a>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage-box" data-stage="s4" onclick="selectStage('s4')">
+      <div class="stage-id">Etapa 4</div>
+      <div class="stage-title">Gestión de Proveedores</div>
+      <div class="stage-sub">Directorio y relación artículo-proveedor</div>
+      <a class="stage-link" href="etapa4_proveedores.html">Ver desarrollo →</a>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage-box" data-stage="s5" onclick="selectStage('s5')">
+      <div class="stage-id">Etapa 5</div>
+      <div class="stage-title">Datos Maestros</div>
+      <div class="stage-sub">Familias, países, parámetros e IVA</div>
+      <a class="stage-link" href="etapa5_maestros.html">Ver desarrollo →</a>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage-box" data-stage="s6" onclick="selectStage('s6')">
+      <div class="stage-id">Etapa 6</div>
+      <div class="stage-title">Informes y Utilidades</div>
+      <div class="stage-sub">Impresión, log y batch</div>
+      <a class="stage-link" href="etapa6_informes.html">Ver desarrollo →</a>
+    </div>
+  </div>
+</div>
+
+<div class="panels-grid">
+  <div class="panel-col">
+    <h3>Explicación funcional</h3>
+    <p id="panelExp">—</p>
+  </div>
+  <div class="panel-col">
+    <h3>Procesos Funcionales</h3>
+    <ul id="panelPF"></ul>
+  </div>
+  <div class="panel-col">
+    <h3>Reglas de Negocio</h3>
+    <ul id="panelBR"></ul>
+  </div>
+</div>
+
+<div class="bottom-panel">
+  <h3>Programas IBM i implicados</h3>
+  <div class="tags-row" id="panelPgm"></div>
+  <h3 style="margin-top:14px">Entidades Db2/DDS afectadas</h3>
+  <div class="tags-row" id="panelEnt"></div>
+</div>
+
+<div class="nav-links">
+  <a href="buscador_reglas.html">🔍 Buscador de Reglas de Negocio</a>
+  <a href="catalogo_procesos.html">📋 Catálogo de Procesos Funcionales</a>
+  <a href="glosario_campos.html">📖 Glosario de Campos</a>
+  <a href="diagrama_er.html">🗄️ Diagrama Entidad-Relación</a>
+  <a href="impacto.html">⚡ Análisis de Impacto</a>
+</div>
+
+<footer>Documentación generada por IBM Bob · Aplicación SAMCO (IBM i) · © 2025</footer>
+
+<script>
+const DATA = {
+  s1:{
+    title:"Gestión de Pedidos",
+    exp:"Cubre el ciclo completo del pedido: selección/creación desde ORD100, cabecera en ORD101 (cliente + número de pedido via data área LASTORDNO), líneas en ORD202 (artículo, cantidad, precio, cálculo IVA por familia), totalización y actualización de ORDER. El trigger SQL ORD701 actualiza automáticamente la fecha del último pedido en CUSTOMER.",
+    pf:[
+      {id:"PF-ORD-001",name:"Crear pedido nuevo"},
+      {id:"PF-ORD-002",name:"Listar y seleccionar pedidos"},
+      {id:"PF-ORD-003",name:"Mantenimiento cabecera pedido"},
+      {id:"PF-ORD-004",name:"Gestión líneas de pedido"},
+      {id:"PF-ORD-005",name:"Procesamiento y cierre de pedido"},
+      {id:"PF-ORD-006",name:"Impresión confirmación pedido"},
+    ],
+    br:[
+      {id:"BR-ORD-001",name:"Cliente debe existir antes de crear pedido",st:"CONFIRMADA"},
+      {id:"BR-ORD-002",name:"Artículo debe estar activo (ARDEL ≠ 'X')",st:"CONFIRMADA"},
+      {id:"BR-ORD-003",name:"Número de pedido secuencial via LASTORDNO",st:"CONFIRMADA"},
+      {id:"BR-ORD-004",name:"IVA calculado según código VAT de familia artículo",st:"CONFIRMADA"},
+      {id:"BR-ORD-005",name:"Total pedido = suma líneas DETORD",st:"CONFIRMADA"},
+      {id:"BR-ORD-006",name:"Trigger ORD701 actualiza CULASTORD en CUSTOMER",st:"CONFIRMADA"},
+    ],
+    programs:["ORD100","ORD101","ORD200","ORD201","ORD202","ORD500","ORD700","ORD900","ORD901","ORD100C","ORD100C2","ORD500C"],
+    entities:["ORDER","DETORD","ORDER1","ORDER2","DETORD1","ORDERCUS","ORD701 (TRG)"]
+  },
+  s2:{
+    title:"Gestión de Artículos",
+    exp:"Permite dar de alta, modificar y consultar el catálogo de artículos. ART200 muestra la lista con subfichero, ART202 hace el mantenimiento completo. Los módulos de servicio ART300/ART301/ART302 exponen funciones reutilizables (GetArtDesc, GetArtStock, ExistArt). ART400 genera informes. ART801 es un stored procedure SQL para procesamiento batch.",
+    pf:[
+      {id:"PF-ART-001",name:"Listar catálogo de artículos"},
+      {id:"PF-ART-002",name:"Alta y modificación de artículo"},
+      {id:"PF-ART-003",name:"Gestión relación artículo-proveedor"},
+      {id:"PF-ART-004",name:"Selección de artículo (ayuda de campo)"},
+      {id:"PF-ART-005",name:"Informe de artículos y stock"},
+    ],
+    br:[
+      {id:"BR-ART-001",name:"Código de artículo único (ARID, 6 chars)",st:"CONFIRMADA"},
+      {id:"BR-ART-002",name:"Precio de venta (ARSALEPR) y precio stock (ARWHSPR) deben ser positivos",st:"CONFIRMADA"},
+      {id:"BR-ART-003",name:"Stock mínimo (ARMINQTY) no puede superar stock actual",st:"REGLA_NO_CONFIRMADA"},
+      {id:"BR-ART-004",name:"Familia de artículo (ARTIFA) debe existir en FAMILLY",st:"CONFIRMADA"},
+      {id:"BR-ART-005",name:"Código IVA por artículo (ARVATCD) referencia tabla VATDEF",st:"CONFIRMADA"},
+      {id:"BR-ART-006",name:"Baja lógica via campo ARDEL='X'",st:"CONFIRMADA"},
+    ],
+    programs:["ART200","ART201","ART202","ART300","ART301","ART302","ART400","ART801"],
+    entities:["ARTICLE","ARTICLE1","ARTICLE2","ARTIPROV","ARTIPRO1","ARTIINF","ARTLSTDAT"]
+  },
+  s3:{
+    title:"Gestión de Clientes",
+    exp:"CUS200 lista clientes con subfichero (búsqueda por nombre o país). CUS301 gestiona el alta/modificación: número autogenerado por secuencia SQL CUSSEQ, validación de país (COUNTRY), límite de crédito y email. Desde la lista de clientes se accede directamente a los pedidos del cliente (ORD200).",
+    pf:[
+      {id:"PF-CUS-001",name:"Listar clientes"},
+      {id:"PF-CUS-002",name:"Alta y modificación de cliente"},
+      {id:"PF-CUS-003",name:"Consulta pedidos de un cliente"},
+      {id:"PF-CUS-004",name:"Validación y selección de cliente"},
+    ],
+    br:[
+      {id:"BR-CUS-001",name:"Número de cliente generado automáticamente por CUSSEQ",st:"CONFIRMADA"},
+      {id:"BR-CUS-002",name:"País (CUCOUN) debe existir en COUNTRY",st:"CONFIRMADA"},
+      {id:"BR-CUS-003",name:"Crédito disponible = CULIMCRE – CUCREDIT",st:"CONFIRMADA"},
+      {id:"BR-CUS-004",name:"Baja lógica via CUDEL='X'",st:"CONFIRMADA"},
+      {id:"BR-CUS-005",name:"CULASTORD actualizado automáticamente por trigger ORD701",st:"CONFIRMADA"},
+    ],
+    programs:["CUS200","CUS300","CUS301"],
+    entities:["CUSTOMER","CUSTOME1","CUSTOME2","CUSSEQ (SEQ)"]
+  },
+  s4:{
+    title:"Gestión de Proveedores",
+    exp:"PRO200 lista proveedores; PRO202/PRO203 gestionan el detalle. La entidad ARTIPROV establece la relación M:N entre artículos y proveedores con precio de compra específico por proveedor (APIPRI). El módulo PRO300 expone funciones de servicio reutilizables.",
+    pf:[
+      {id:"PF-PRO-001",name:"Listar y seleccionar proveedores"},
+      {id:"PF-PRO-002",name:"Alta y modificación de proveedor"},
+      {id:"PF-PRO-003",name:"Gestión de artículos por proveedor"},
+    ],
+    br:[
+      {id:"BR-PRO-001",name:"Número de proveedor único (PRID, 5 dígitos)",st:"CONFIRMADA"},
+      {id:"BR-PRO-002",name:"Precio proveedor (APIPRI) independiente del precio de venta",st:"CONFIRMADA"},
+      {id:"BR-PRO-003",name:"Baja lógica via PRDEL='X'",st:"CONFIRMADA"},
+    ],
+    programs:["PRO200","PRO202","PRO203","PRO300"],
+    entities:["PROVIDER","ARTIPROV","ARTIPRO1","PROVIDE1"]
+  },
+  s5:{
+    title:"Datos Maestros",
+    exp:"Gestión de entidades de referencia: familias de artículos (FAMILLY con tasa IVA por defecto), países (COUNTRY con códigos ISO), parámetros de sistema (PARAMETER), tasas IVA (VATDEF). PAR201.CLLE gestiona la creación de parámetros en batch. Las funciones VAT (CLCVat, GetVATRate) son consumidas por la lógica de pedidos.",
+    pf:[
+      {id:"PF-MAE-001",name:"Mantenimiento de familias de artículos"},
+      {id:"PF-MAE-002",name:"Mantenimiento de países"},
+      {id:"PF-MAE-003",name:"Mantenimiento de parámetros de sistema"},
+      {id:"PF-MAE-004",name:"Consulta y cálculo de tasas IVA"},
+    ],
+    br:[
+      {id:"BR-MAE-001",name:"Código familia (FAID) de 3 caracteres, único",st:"CONFIRMADA"},
+      {id:"BR-MAE-002",name:"Tasa IVA default por familia (FAVATCD) referencia VATDEF",st:"CONFIRMADA"},
+      {id:"BR-MAE-003",name:"Código país (COID) de 2 caracteres con ISO-3166",st:"CONFIRMADA"},
+      {id:"BR-MAE-004",name:"Baja lógica en familias via FADEL='X'",st:"CONFIRMADA"},
+    ],
+    programs:["FAM300","FAM301","COU300","COU301","PAR200","PAR300","PAR201"],
+    entities:["FAMILLY","FAMILL1","COUNTRY","COUNTR1","PARAMETER","VATDEF (ISOTODATE)"]
+  },
+  s6:{
+    title:"Informes y Utilidades",
+    exp:"ORD500 imprime confirmaciones/albaranes usando el fichero de impresora ORD500O. LOG300 escribe trazas en el user space SAMLOG via API IBM i (RTVUSRSPCPTR). LOG100 permite la consulta del log. DAT001/DAT002 proveen utilitarios de fecha; TXT001 de texto; XML001 de XML. Las funciones ISOTODATE/ISOTODATE4 son UDFs SQL para conversión de fechas.",
+    pf:[
+      {id:"PF-UTL-001",name:"Impresión de confirmación/albarán de pedido"},
+      {id:"PF-UTL-002",name:"Registro y consulta de log de aplicación"},
+      {id:"PF-UTL-003",name:"Conversión y manejo de fechas"},
+      {id:"PF-UTL-004",name:"Procesamiento XML e IFS"},
+    ],
+    br:[
+      {id:"BR-UTL-001",name:"Log incluye usuario, timestamp y mensaje (hasta 500 chars)",st:"CONFIRMADA"},
+      {id:"BR-UTL-002",name:"Log almacenado en user space SAMLOG (*LIBL)",st:"CONFIRMADA"},
+      {id:"BR-UTL-003",name:"Impresión de pedido requiere cabecera y líneas completas",st:"REGLA_NO_CONFIRMADA"},
+    ],
+    programs:["ORD500","ORD500C","LOG100","LOG300","DAT001","DAT002","TXT001","XML001"],
+    entities:["ORD500O (PRTF)","SAMLOG (*USRSPC)","IFS (stream files)"]
+  }
+};
+
+let current = 's1';
+function selectStage(id){
+  document.querySelectorAll('.stage-box').forEach(b=>b.classList.toggle('active',b.dataset.stage===id));
+  current = id;
+  render();
+}
+function render(){
+  const d = DATA[current];
+  document.getElementById('panelExp').textContent = d.exp;
+  document.getElementById('panelPF').innerHTML = d.pf.map(p=>
+    `<li><span class="badge badge-pf">${p.id}</span>${p.name}</li>`).join('');
+  document.getElementById('panelBR').innerHTML = d.br.map(b=>
+    `<li><span class="badge badge-br">${b.id}</span><span class="badge ${b.st==='CONFIRMADA'?'badge-conf':'badge-ncnf'}">${b.st}</span>${b.name}</li>`).join('');
+  document.getElementById('panelPgm').innerHTML = d.programs.map(p=>
+    `<span class="pgm-tag">${p}</span>`).join('');
+  document.getElementById('panelEnt').innerHTML = d.entities.map(e=>
+    `<span class="ent-tag">${e}</span>`).join('');
+}
+render();
+</script>
+</body>
+</html>

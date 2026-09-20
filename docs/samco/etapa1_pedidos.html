@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Etapa 1 – Gestión de Pedidos</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;--gray-3:#d4d4d4;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);letter-spacing:-.3px;color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.hero{padding:36px 40px 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted);max-width:680px}
+/* SUB-FLOW */
+.subflow{padding:28px 40px;border-bottom:1px solid var(--border)}
+.subflow h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;color:var(--fg-muted)}
+.steps-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.step-node{display:flex;flex-direction:column;align-items:center;cursor:pointer;min-width:120px}
+.step-circle{width:44px;height:44px;border-radius:50%;border:2px solid var(--border-strong);background:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;
+  transition:all .15s}
+.step-node:hover .step-circle,.step-node.active .step-circle{background:var(--border-strong);color:#fff}
+.step-node .step-lbl{font-size:11px;margin-top:5px;text-align:center;max-width:110px;line-height:1.2}
+.step-arrow{color:var(--gray-3);font-size:20px;padding:0 2px;margin-top:-18px}
+/* DETAIL MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-card{background:#fff;border:1px solid var(--border-strong);width:90%;max-width:680px;max-height:82vh;overflow-y:auto;
+  border-radius:2px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--fg-muted);line-height:1}
+.modal-body{padding:20px}
+.modal-body h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-muted);margin:16px 0 8px}
+.modal-body h4:first-child{margin-top:0}
+.modal-body p,.modal-body li{font-size:13px;line-height:1.6}
+.modal-body ul{padding-left:18px}
+.modal-body code{font-family:var(--font-mono);font-size:12px;background:var(--gray-1);padding:1px 4px;border-radius:2px}
+/* SECTIONS */
+.content-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--border)}
+.content-col{padding:24px 28px;border-right:1px solid var(--border)}
+.content-col:last-child{border-right:none}
+.content-col h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);margin-bottom:12px}
+.rule-card{border:1px solid var(--border);border-radius:2px;padding:12px 14px;margin-bottom:8px;background:#fff}
+.rule-card .rc-id{font-family:var(--font-mono);font-size:10px;color:var(--warn);margin-bottom:3px}
+.rule-card .rc-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.rule-card .rc-desc{font-size:12px;color:var(--fg-muted)}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;margin-right:4px}
+.badge-conf{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.badge-ncnf{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.pgm-card{border:1px solid var(--border);padding:10px 14px;margin-bottom:8px;background:#fff;border-radius:2px}
+.pgm-card .pc-name{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.pgm-card .pc-desc{font-size:12px;color:var(--fg-muted)}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Etapa 1 &nbsp;·&nbsp; Gestión de Pedidos</span>
+  <a href="flujo_samco.html">← Volver al flujo completo</a>
+</header>
+
+<div class="hero">
+  <h1>Etapa 1 — Gestión de Pedidos</h1>
+  <p>Ciclo completo del pedido: selección, creación, mantenimiento de cabecera y líneas, totalización, procesamiento y emisión de documentos. Haz clic en cualquier paso para ver la lógica detallada.</p>
+</div>
+
+<!-- SUB-FLUJO -->
+<div class="subflow">
+  <h2>Sub-flujo de la etapa</h2>
+  <div class="steps-row" id="stepsRow">
+    <div class="step-node active" onclick="openStep(0)">
+      <div class="step-circle">S1.1</div>
+      <div class="step-lbl">Lista de pedidos</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node" onclick="openStep(1)">
+      <div class="step-circle">S1.2</div>
+      <div class="step-lbl">Cabecera de pedido</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node" onclick="openStep(2)">
+      <div class="step-circle">S1.3</div>
+      <div class="step-lbl">Líneas de pedido</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node" onclick="openStep(3)">
+      <div class="step-circle">S1.4</div>
+      <div class="step-lbl">Cálculo totales</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node" onclick="openStep(4)">
+      <div class="step-circle">S1.5</div>
+      <div class="step-lbl">Procesamiento</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-node" onclick="openStep(5)">
+      <div class="step-circle">S1.6</div>
+      <div class="step-lbl">Impresión</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="modalTitle">—</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- REGLAS + PROGRAMAS -->
+<div class="content-grid">
+  <div class="content-col">
+    <h2>Reglas de Negocio</h2>
+
+    <div class="rule-card">
+      <div class="rc-id">BR-ORD-001 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">El cliente debe existir antes de crear un pedido</div>
+      <div class="rc-desc">Programa ORD101/ORD100 llama a <code>ExistCus(CUID)</code> del servicio FCUSTOMER. Si devuelve <em>false</em>, el pedido no se crea.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rc-id">BR-ORD-002 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Solo artículos activos (ARDEL ≠ 'X') pueden añadirse a un pedido</div>
+      <div class="rc-desc"><code>IsArtDeleted(ARID)</code> / <code>ExistArt(ARID)</code> del servicio FARTICLE validan el estado antes de añadir la línea DETORD.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rc-id">BR-ORD-003 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Número de pedido secuencial vía data área LASTORDNO</div>
+      <div class="rc-desc">ORD100 declara <code>Ordno s 6s 0 DTAARA('LASTORDNO')</code>. El número se incrementa atómicamente en cada creación de pedido.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rc-id">BR-ORD-004 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">IVA calculado según código IVA de la familia del artículo</div>
+      <div class="rc-desc"><code>GetArtVatCode(ARID)</code> obtiene el código IVA; luego <code>CLCVat(VATCODE, NetValue)</code> de FVAT calcula el importe IVA de la línea.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rc-id">BR-ORD-005 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Total pedido = suma de todas las líneas DETORD</div>
+      <div class="rc-desc">Campos ODTOT y ODTOTVAT en DETORD; ORDER almacena el agregado en ORDTOT y ORDVAT. La actualización es obligatoria tras cada cambio de línea.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rc-id">BR-ORD-006 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Trigger ORD701 actualiza CULASTORD al insertar ORDER</div>
+      <div class="rc-desc">Trigger SQL AFTER INSERT en ORDER: <code>UPDATE Customer SET culastord = n.ordate WHERE cuid = N.orcuid</code>. Garantiza la trazabilidad del último pedido del cliente.</div>
+    </div>
+  </div>
+
+  <div class="content-col">
+    <h2>Programas IBM i</h2>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD100 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE</span></div>
+      <div class="pc-desc">Lista de pedidos con subfichero. Crea nuevos pedidos vía ORD100C (CL). Gestiona data área LASTORDNO para numeración. Accede a ORDER y DETORD directamente.</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD100C / ORD100C2 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.CLLE</span></div>
+      <div class="pc-desc">CL de creación de pedido. Crea copia de DETORD en QTEMP, aplica OVRDBF a TMPDETORD, y llama a CRTORD. Aísla las líneas en edición del fichero de producción.</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD101 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE (extpgm)</span></div>
+      <div class="pc-desc">Mantenimiento de cabecera de pedido (cliente, fechas, estado). Referenciado como <code>Updord extpgm('ORD101')</code> desde ORD200.</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD200 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.SQLRPGLE</span></div>
+      <div class="pc-desc">Lista de pedidos por cliente (CUSTOME1, ORDER1). Llama a ORD101 (cabecera), ORD202 (líneas) y ORD500 (impresión). Patrón panel-step (prp/lod/dsp/key/chk/act).</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD202 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE</span></div>
+      <div class="pc-desc">Mantenimiento de líneas de pedido. Valida artículo, calcula importes e IVA, gestiona DETORD. Es el núcleo transaccional del pedido.</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD500 + ORD500C &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE / .CLLE</span></div>
+      <div class="pc-desc">Impresión de confirmación de pedido (fichero ORD500O.PRTF). El CL ORD500C prepara el entorno y llama al programa de impresión.</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD700 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE</span></div>
+      <div class="pc-desc">Procesamiento de pedidos: verifica disponibilidad de stock, reduce ARSTOCK en ARTICLE, actualiza estado ORDER a procesado.</div>
+    </div>
+
+    <div class="pgm-card">
+      <div class="pc-name">ORD701 &nbsp;<span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLTRG</span></div>
+      <div class="pc-desc">Trigger SQL AFTER INSERT en ORDER. Actualiza <code>CULASTORD</code> en CUSTOMER con la fecha del nuevo pedido.</div>
+    </div>
+  </div>
+</div>
+
+<footer>SAMCO · Etapa 1 – Gestión de Pedidos &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a> &nbsp;|&nbsp; <a href="buscador_reglas.html">Buscador de reglas</a></footer>
+
+<!-- STEP MODAL DATA -->
+<script>
+const STEPS = [
+  {
+    title:"S1.1 – Lista de pedidos (ORD100 / ORD200)",
+    html:`<h4>Programa principal</h4>
+    <p><code>ORD100.PGM.RPGLE</code> — muestra subfichero de pedidos filtrando por cliente opcional (<code>CUID</code> parámetro <code>*NOPASS</code>). Accede a <code>ORDER</code> y <code>FDETORD</code>. Patrón: <strong>panel/step</strong> (prp→lod→dsp→key→chk→act).</p>
+    <p>También <code>ORD200.PGM.SQLRPGLE</code> para mantenimiento post-creación, con acceso a <code>ORDER1</code> (LF por cliente) y <code>CUSTOME1</code>.</p>
+    <h4>Ficheros utilizados</h4>
+    <ul><li><code>ORDER</code> — cabecera pedido</li><li><code>ORDER1</code> — LF por ORCUID (cliente)</li><li><code>DETORD1</code> — LF por artículo</li></ul>
+    <h4>Acciones disponibles</h4>
+    <ul><li>F6 → Crear nuevo pedido (llama ORD100C)</li><li>Opción 2 → Modificar cabecera (ORD101)</li><li>Opción 5 → Ver líneas (ORD202)</li><li>Opción 6 → Imprimir (ORD500)</li></ul>`
+  },
+  {
+    title:"S1.2 – Cabecera de pedido (ORD101)",
+    html:`<h4>Programa</h4>
+    <p><code>ORD101.PGM.RPGLE</code> — referenciado como <code>extpgm('ORD101')</code> con parámetro <code>ORID</code>. Crea/modifica la cabecera en <code>ORDER</code>.</p>
+    <h4>Campos clave</h4>
+    <ul>
+      <li><code>ORID</code> — Número de pedido (PK, 6P 0), generado de LASTORDNO</li>
+      <li><code>ORYEAR</code> — Año del pedido</li>
+      <li><code>ORCUID</code> — Cliente (FK → CUSTOMER.CUID)</li>
+      <li><code>ORDATE</code> — Fecha pedido (8,0 YYYYMMDD)</li>
+      <li><code>ORDATDEL</code> — Fecha de entrega</li>
+      <li><code>ORDATCLO</code> — Fecha de cierre</li>
+    </ul>
+    <h4>Validaciones</h4>
+    <ul><li>Cliente validado con <code>ExistCus(CUID)</code> → FCUSTOMER</li><li>Número de pedido: lectura/escritura atómica de LASTORDNO (*DTAARA)</li></ul>`
+  },
+  {
+    title:"S1.3 – Líneas de pedido (ORD202)",
+    html:`<h4>Programa</h4>
+    <p><code>ORD202.PGM.RPGLE</code> — gestión completa de líneas DETORD. Parámetro: <code>ORID</code>.</p>
+    <h4>Campos de DETORD</h4>
+    <ul>
+      <li><code>ODORID</code> — Número pedido (FK)</li>
+      <li><code>ODYEAR</code> — Año pedido</li>
+      <li><code>ODLINE</code> — Número de línea (PK)</li>
+      <li><code>ODARID</code> — Artículo (FK → ARTICLE.ARID)</li>
+      <li><code>ODQTY</code> — Cantidad pedida</li>
+      <li><code>ODQTYLIV</code> — Cantidad entregada</li>
+      <li><code>ODPRICE</code> — Precio unitario</li>
+      <li><code>ODTOT</code> — Importe línea</li>
+      <li><code>ODTOTVAT</code> — Importe con IVA</li>
+    </ul>
+    <h4>Lógica de cálculo</h4>
+    <ul>
+      <li>ODTOT = ODQTY × ODPRICE</li>
+      <li>Código IVA via <code>GetArtVatCode(ARID)</code></li>
+      <li>ODTOTVAT = ODTOT + <code>CLCVat(VATCODE, ODTOT)</code></li>
+    </ul>`
+  },
+  {
+    title:"S1.4 – Cálculo de totales ORDER",
+    html:`<h4>Lógica de totalización</h4>
+    <p>Tras añadir/modificar/eliminar líneas DETORD, el programa recalcula los totales del pedido sumando ODTOT y ODTOTVAT de todas las líneas para actualizar ORDER:</p>
+    <ul>
+      <li>ORDTOT = Σ ODTOT de líneas del pedido</li>
+      <li>ORDVAT = Σ (ODTOTVAT - ODTOT) de líneas del pedido</li>
+    </ul>
+    <h4>Ficheros</h4>
+    <ul><li><code>DETORD</code> lectura agregada por ODORID+ODYEAR</li><li><code>ORDER</code> update cabecera</li></ul>
+    <h4>Integridad</h4>
+    <p>La vista SQL <code>ORDERCUS.VIEW</code> expone ORDER JOIN CUSTOMER para informes consolidados.</p>`
+  },
+  {
+    title:"S1.5 – Procesamiento de pedido (ORD700)",
+    html:`<h4>Programa</h4>
+    <p><code>ORD700.PGM.RPGLE</code> — procesa pedidos confirmados. Modifica stock de artículos y actualiza estado del pedido.</p>
+    <h4>Acciones</h4>
+    <ul>
+      <li>Verifica disponibilidad: <code>ARSTOCK</code> ≥ <code>ODQTY</code></li>
+      <li>Descuenta stock: <code>ARSTOCK = ARSTOCK - ODQTY</code> en ARTICLE</li>
+      <li>Actualiza <code>ARCUSQTY</code> (cantidad pedida por clientes)</li>
+      <li>Marca pedido como procesado</li>
+    </ul>
+    <h4>Reglas de negocio asociadas</h4>
+    <ul><li>BR-ART-003: Stock mínimo tras descuento</li><li>BR-ORD-002: Solo artículos activos</li></ul>`
+  },
+  {
+    title:"S1.6 – Impresión de pedido (ORD500)",
+    html:`<h4>Programas</h4>
+    <p><code>ORD500C.PGM.CLLE</code> — prepara entorno (sobreescrituras de ficheros) y llama a <code>ORD500.PGM.RPGLE</code>.</p>
+    <p><code>ORD500.PGM.RPGLE</code> — genera el informe/albarán usando el fichero de impresora <code>ORD500O.PRTF</code>.</p>
+    <h4>Contenido del informe</h4>
+    <ul>
+      <li>Cabecera: datos del pedido y cliente</li>
+      <li>Líneas: artículo, descripción, cantidad, precio, importe</li>
+      <li>Pie: total neto, IVA total, total con IVA</li>
+    </ul>
+    <h4>Fichero de impresora</h4>
+    <p><code>ORD500O.PRTF</code> definido en QDDSSRC. Salida a spool IBM i.</p>`
+  }
+];
+
+function openStep(i){
+  document.querySelectorAll('.step-node').forEach((n,j)=>n.classList.toggle('active',j===i));
+  document.getElementById('modalTitle').textContent = STEPS[i].title;
+  document.getElementById('modalBody').innerHTML = STEPS[i].html;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+</script>
+</body>
+</html>

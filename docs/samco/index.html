@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Portal de Documentación</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;--gray-3:#d4d4d4;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{background:#fff;border-bottom:2px solid var(--border-strong);
+  display:flex;align-items:center;gap:16px;padding:0 40px;height:56px}
+.site-header .brand{font-size:15px;font-weight:700;font-family:var(--font-mono);letter-spacing:-.4px;color:var(--accent)}
+.site-header .sub{font-size:12px;color:var(--fg-muted);margin-left:8px}
+
+/* HERO SECTION */
+.hero{padding:60px 40px 48px;border-bottom:1px solid var(--border);max-width:900px}
+.hero .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-muted);margin-bottom:14px}
+.hero h1{font-size:36px;font-weight:700;letter-spacing:-.8px;line-height:1.1;margin-bottom:16px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{font-size:15px;color:var(--fg-muted);max-width:620px;line-height:1.7;margin-bottom:28px}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--border-strong);color:#fff;
+  padding:12px 22px;text-decoration:none;font-size:13px;font-weight:600;border-radius:2px;transition:opacity .15s}
+.hero-cta:hover{opacity:.85}
+
+/* STATS BAR */
+.stats-bar{display:flex;flex-wrap:wrap;padding:24px 40px;border-bottom:1px solid var(--border);background:#fff;gap:0}
+.stat{flex:1;min-width:140px;padding:0 20px;border-right:1px solid var(--border)}
+.stat:first-child{padding-left:0}
+.stat:last-child{border-right:none}
+.stat-n{font-size:28px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.stat-l{font-size:12px;color:var(--fg-muted);margin-top:2px}
+
+/* CARD GRID */
+.section-title{padding:32px 40px 16px;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--fg-muted);border-top:1px solid var(--border)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;
+  background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.card{background:#fff;padding:28px 28px 24px;display:flex;flex-direction:column;text-decoration:none;color:var(--fg);transition:background .15s}
+.card:hover{background:#fafafa}
+.card-icon{font-size:22px;margin-bottom:12px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:6px;letter-spacing:-.2px}
+.card-desc{font-size:12px;color:var(--fg-muted);line-height:1.6;flex:1}
+.card-link{font-size:12px;color:var(--accent);margin-top:14px;font-weight:600}
+
+/* ARCHITECTURE SUMMARY */
+.arch-section{padding:40px 40px;border-bottom:1px solid var(--border)}
+.arch-section h2{font-size:16px;font-weight:700;letter-spacing:-.3px;margin-bottom:20px}
+.arch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.arch-col{padding:16px;border:1px solid var(--border);border-radius:2px;background:#fff}
+.arch-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--fg-muted);padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.arch-item{font-family:var(--font-mono);font-size:11px;padding:3px 0;border-bottom:1px solid var(--gray-1);color:var(--fg-muted)}
+.arch-item span{color:var(--fg)}
+.arch-item:last-child{border-bottom:none}
+
+/* MÓDULO LIST */
+.modulo-list{padding:0 40px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.mod-card{background:#fff;border:1px solid var(--border);border-radius:2px;padding:16px 18px;text-decoration:none;color:var(--fg);display:block}
+.mod-card:hover{border-color:var(--border-strong)}
+.mod-id{font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-bottom:6px;font-weight:700}
+.mod-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.mod-desc{font-size:12px;color:var(--fg-muted)}
+.mod-badge{display:inline-block;font-size:10px;font-family:var(--font-mono);padding:1px 5px;border-radius:2px;
+  background:var(--gray-1);border:1px solid var(--gray-2);margin-right:3px;margin-top:6px}
+
+footer{padding:28px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border);display:flex;gap:20px;flex-wrap:wrap}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="sub">Portal de Documentación Técnica y Funcional</span>
+</header>
+
+<div class="hero">
+  <div class="eyebrow">IBM i Application · Documentación generada por IBM Bob</div>
+  <h1>Aplicación de gestión<br>empresarial <em>SAMCO</em></h1>
+  <p>Sistema IBM i multi-módulo que gestiona pedidos, artículos, clientes, proveedores y datos maestros. Arquitectura ILE en 3 capas con 40+ programas RPG/SQLRPGLE, 9 ficheros físicos DDS, 6+ ficheros lógicos, 8 service programs y objetos SQL.</p>
+  <a class="hero-cta" href="flujo_samco.html">Ver flujo funcional completo →</a>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-n">40+</div><div class="stat-l">Programas RPG/SQLRPGLE</div></div>
+  <div class="stat"><div class="stat-n">9</div><div class="stat-l">Ficheros físicos (PF)</div></div>
+  <div class="stat"><div class="stat-n">8</div><div class="stat-l">Service Programs</div></div>
+  <div class="stat"><div class="stat-n">27</div><div class="stat-l">Reglas de negocio</div></div>
+  <div class="stat"><div class="stat-n">27</div><div class="stat-l">Procesos funcionales</div></div>
+  <div class="stat"><div class="stat-n">70+</div><div class="stat-l">Campos documentados</div></div>
+</div>
+
+<div class="section-title">Acceso rápido al portal</div>
+
+<div class="card-grid">
+  <a class="card" href="flujo_samco.html">
+    <div class="card-icon">🔄</div>
+    <div class="card-title">Flujo Funcional Completo</div>
+    <div class="card-desc">Vista panorámica de las 6 etapas del sistema: pedidos, artículos, clientes, proveedores, maestros y utilidades. Con paneles reactivos de procesos y reglas.</div>
+    <div class="card-link">Explorar flujo →</div>
+  </a>
+  <a class="card" href="etapa1_pedidos.html">
+    <div class="card-icon">📦</div>
+    <div class="card-title">Etapa 1 · Gestión de Pedidos</div>
+    <div class="card-desc">Sub-flujo completo del ciclo de pedido: creación, cabecera, líneas, cálculo IVA, procesamiento e impresión. Lógica detallada de ORD100–ORD700 y trigger ORD701.</div>
+    <div class="card-link">Ver detalle →</div>
+  </a>
+  <a class="card" href="etapa2_articulos.html">
+    <div class="card-icon">🏷️</div>
+    <div class="card-title">Etapa 2 · Gestión de Artículos</div>
+    <div class="card-desc">Catálogo, precios, stock, familia, IVA y relación con proveedores. API completa del servicio FARTICLE con 12 funciones exportadas documentadas.</div>
+    <div class="card-link">Ver detalle →</div>
+  </a>
+  <a class="card" href="etapa3_clientes.html">
+    <div class="card-icon">👤</div>
+    <div class="card-title">Etapa 3 · Gestión de Clientes</div>
+    <div class="card-desc">Alta con CUSSEQ, validación de país, gestión de crédito y acceso directo a pedidos. API del servicio FCUSTOMER con 10 funciones documentadas.</div>
+    <div class="card-link">Ver detalle →</div>
+  </a>
+  <a class="card" href="etapa4_proveedores.html">
+    <div class="card-icon">🏭</div>
+    <div class="card-title">Etapas 4–5–6 · Proveedores / Maestros / Utilidades</div>
+    <div class="card-desc">Proveedores (FPROVIDER), datos maestros (familias, países, parámetros, IVA) y utilidades de log, fechas, XML e impresión.</div>
+    <div class="card-link">Ver detalle →</div>
+  </a>
+  <a class="card" href="buscador_reglas.html">
+    <div class="card-icon">🔍</div>
+    <div class="card-title">Buscador de Reglas de Negocio</div>
+    <div class="card-desc">27 reglas de negocio identificadas. Filtrado instantáneo por texto, módulo y estado (CONFIRMADA / REGLA_NO_CONFIRMADA). Con entidad y programa fuente.</div>
+    <div class="card-link">Buscar reglas →</div>
+  </a>
+  <a class="card" href="catalogo_procesos.html">
+    <div class="card-icon">📋</div>
+    <div class="card-title">Catálogo de Procesos Funcionales</div>
+    <div class="card-desc">27 procesos funcionales (PF-XXX-NNN) con programas fuente, reglas de negocio relacionadas y entidades Db2 afectadas. Tarjetas con filtro reactivo.</div>
+    <div class="card-link">Ver catálogo →</div>
+  </a>
+  <a class="card" href="glosario_campos.html">
+    <div class="card-icon">📖</div>
+    <div class="card-title">Glosario de Campos</div>
+    <div class="card-desc">70+ campos de 9 entidades físicas. Tipo IBM i, descripción funcional, valores/flags permitidos, claves PK/FK y programas que los utilizan.</div>
+    <div class="card-link">Ver glosario →</div>
+  </a>
+  <a class="card" href="diagrama_er.html">
+    <div class="card-icon">🗄️</div>
+    <div class="card-title">Diagrama Entidad-Relación Interactivo</div>
+    <div class="card-desc">Grafo SVG circular con 11 entidades. Click para ver ficha técnica con campos, cardinalidades y trazado de relaciones. Buscador reactivo integrado.</div>
+    <div class="card-link">Explorar entidades →</div>
+  </a>
+  <a class="card" href="impacto.html">
+    <div class="card-icon">⚡</div>
+    <div class="card-title">Análisis de Impacto y Trazabilidad</div>
+    <div class="card-desc">Búsqueda cruzada bidireccional programa↔entidad↔regla↔proceso. Cuatro vistas: por programa, por entidad, por regla y matriz de impacto.</div>
+    <div class="card-link">Analizar impacto →</div>
+  </a>
+</div>
+
+<div class="arch-section">
+  <h2>Arquitectura técnica IBM i</h2>
+  <div class="arch-grid">
+    <div class="arch-col">
+      <div class="arch-col-title">Presentación (DSPF)</div>
+      <div class="arch-item"><span>ART200D</span> · Work with Articles</div>
+      <div class="arch-item"><span>ORD100D/200D</span> · Orders</div>
+      <div class="arch-item"><span>CUS200D</span> · Customers</div>
+      <div class="arch-item"><span>PRO200D</span> · Providers</div>
+      <div class="arch-item"><span>FAM301D</span> · Families</div>
+      <div class="arch-item"><span>COU200D/301D</span> · Countries</div>
+      <div class="arch-item"><span>PAR200D</span> · Parameters</div>
+      <div class="arch-item"><span>ORD500O</span> · Printer file</div>
+    </div>
+    <div class="arch-col">
+      <div class="arch-col-title">Lógica de Negocio (PGM)</div>
+      <div class="arch-item"><span>ORD100–ORD901</span> · Pedidos</div>
+      <div class="arch-item"><span>ART200–ART400</span> · Artículos</div>
+      <div class="arch-item"><span>CUS200, CUS301</span> · Clientes</div>
+      <div class="arch-item"><span>PRO200–PRO203</span> · Proveedores</div>
+      <div class="arch-item"><span>FAM300/301</span> · Familias</div>
+      <div class="arch-item"><span>COU300/301</span> · Países</div>
+      <div class="arch-item"><span>PAR200/201</span> · Parámetros</div>
+      <div class="arch-item"><span>LOG100</span> · Log viewer</div>
+    </div>
+    <div class="arch-col">
+      <div class="arch-col-title">Service Programs</div>
+      <div class="arch-item"><span>FARTICLE</span> · ART300/301/302</div>
+      <div class="arch-item"><span>FCUSTOMER</span> · CUS300</div>
+      <div class="arch-item"><span>FCOUNTRY</span> · COU300</div>
+      <div class="arch-item"><span>FFAMILLY</span> · FAM300</div>
+      <div class="arch-item"><span>FPROVIDER</span> · PRO300</div>
+      <div class="arch-item"><span>FPARAMETER</span> · PAR300</div>
+      <div class="arch-item"><span>LOG</span> · LOG300</div>
+      <div class="arch-item"><span>FVAT</span> · functionsVAT</div>
+    </div>
+    <div class="arch-col">
+      <div class="arch-col-title">Datos (PF/LF/SQL)</div>
+      <div class="arch-item"><span>ARTICLE/1/2</span> · Artículos</div>
+      <div class="arch-item"><span>CUSTOMER/1/2</span> · Clientes</div>
+      <div class="arch-item"><span>ORDER/1/2/3</span> · Pedidos</div>
+      <div class="arch-item"><span>DETORD/1</span> · Líneas</div>
+      <div class="arch-item"><span>FAMILLY/1</span> · Familias</div>
+      <div class="arch-item"><span>COUNTRY/1</span> · Países</div>
+      <div class="arch-item"><span>PROVIDER/1</span> · Proveedores</div>
+      <div class="arch-item"><span>ARTIPROV/1</span> · Art-Prov</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>© 2025 &nbsp;·&nbsp; SAMCO IBM i Application Documentation</span>
+  <span>Generado por <strong>IBM Bob</strong> · Ingeniería Inversa de Código Fuente</span>
+  <a href="flujo_samco.html">Flujo completo</a>
+  <a href="buscador_reglas.html">Reglas</a>
+  <a href="catalogo_procesos.html">Procesos</a>
+  <a href="glosario_campos.html">Glosario</a>
+  <a href="diagrama_er.html">Diagrama ER</a>
+  <a href="impacto.html">Impacto</a>
+</footer>
+</body>
+</html>

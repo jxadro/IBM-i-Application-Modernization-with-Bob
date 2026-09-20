@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Etapa 2 – Gestión de Artículos</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.hero{padding:36px 40px 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted)}
+.content{padding:28px 40px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.section{background:#fff;border:1px solid var(--border);border-radius:2px;padding:20px 22px}
+.section h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);margin-bottom:14px}
+.rule-card{border:1px solid var(--border);border-radius:2px;padding:11px 13px;margin-bottom:8px}
+.rc-id{font-family:var(--font-mono);font-size:10px;color:var(--warn);margin-bottom:3px}
+.rc-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.rc-desc{font-size:12px;color:var(--fg-muted)}
+.pgm-card{border:1px solid var(--border);padding:10px 14px;margin-bottom:8px;border-radius:2px}
+.pc-name{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.pc-desc{font-size:12px;color:var(--fg-muted)}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;margin-right:4px}
+.badge-conf{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.badge-ncnf{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+/* service API box */
+.api-box{background:var(--gray-1);border:1px solid var(--border);border-radius:2px;padding:12px 14px;margin-bottom:8px;font-family:var(--font-mono);font-size:11px}
+.api-fn{font-weight:700;color:var(--accent);display:block;margin-bottom:2px}
+.api-sig{color:var(--fg-muted)}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Etapa 2 &nbsp;·&nbsp; Gestión de Artículos</span>
+  <a href="flujo_samco.html">← Volver al flujo completo</a>
+</header>
+
+<div class="hero">
+  <h1>Etapa 2 — Gestión de Artículos</h1>
+  <p>Catálogo de artículos, precios (venta y stock), stock actual y mínimo, familia, código IVA y relación con proveedores. Arquitectura de servicio FARTICLE con módulos RPGLE reutilizables.</p>
+</div>
+
+<div class="content">
+  <div class="section">
+    <h2>Reglas de Negocio</h2>
+    <div class="rule-card"><div class="rc-id">BR-ART-001 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Código de artículo único (ARID, 6 chars)</div>
+      <div class="rc-desc">Clave primaria de ARTICLE. Unicidad garantizada por fichero físico. Duplicado → error de clave.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-ART-002 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Precios positivos (ARSALEPR y ARWHSPR)</div>
+      <div class="rc-desc">ART202 valida que ARSALEPR > 0 y ARWHSPR > 0 antes de escribir el registro.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-ART-003 &nbsp;<span class="badge badge-ncnf">REGLA_NO_CONFIRMADA</span></div>
+      <div class="rc-title">Stock mínimo ≤ stock actual (ARMINQTY ≤ ARSTOCK)</div>
+      <div class="rc-desc">Regla deducida del diseño de campos. No confirmada en código fuente actual.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-ART-004 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Familia (ARTIFA) debe existir en FAMILLY</div>
+      <div class="rc-desc">ART202 verifica la familia usando GetArtFam(). Registros huérfanos no permitidos.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-ART-005 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Código IVA (ARVATCD) referencia VATDEF. Default='2'</div>
+      <div class="rc-desc">ExistVATRate(VATCODE) valida el código IVA. SAMREF.PF define DFT('2') para VATCODE.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-ART-006 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Baja lógica via ARDEL='X'</div>
+      <div class="rc-desc">No hay borrado físico. IsArtDeleted(ARID) verifica ARDEL. Artículos con ARDEL='X' no pueden pedirse.</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Programas IBM i</h2>
+    <div class="pgm-card"><div class="pc-name">ART200 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.SQLRPGLE</span></div>
+      <div class="pc-desc">Programa principal de lista de artículos con subfichero. Accede a ARTICLE2 (LF por familia) y ARTICLE1. Usa /copy familly para las funciones de familia. Llama a ART201 para gestión de proveedores.</div></div>
+    <div class="pgm-card"><div class="pc-name">ART202 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE</span></div>
+      <div class="pc-desc">Mantenimiento completo del artículo: todos los campos de ARTICLE. Valida familia, precios e IVA. Aplica patrón panel/step (prp/lod/dsp/key/chk/act).</div></div>
+    <div class="pgm-card"><div class="pc-name">ART201 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE</span></div>
+      <div class="pc-desc">Gestión de relación artículo-proveedor (ARTIPROV). Referenciado como extpgm('ART201') con parámetro ARID.</div></div>
+    <div class="pgm-card"><div class="pc-name">ART300 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE (módulo FARTICLE)</span></div>
+      <div class="pc-desc">Módulo de servicio: funciones CRUD de artículo sobre ARTICLE1. Exporta todas las funciones GetArt* e IsArtDeleted.</div></div>
+    <div class="pgm-card"><div class="pc-name">ART301 / ART302 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLRPGLE (módulos)</span></div>
+      <div class="pc-desc">ART301: funciones SQL de artículo (SltArticle, GetArtInfo). ART302: validaciones adicionales con SQL embebido.</div></div>
+    <div class="pgm-card"><div class="pc-name">ART400 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLRPGLE</span></div>
+      <div class="pc-desc">Módulo de reporting de artículos. Genera datos para informes de stock y valoración via ARTLSTDAT view.</div></div>
+  </div>
+
+  <div class="section" style="grid-column:1/-1">
+    <h2>API del Servicio FARTICLE — Funciones Exportadas</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px">
+      <div class="api-box"><span class="api-fn">GetArtDesc(ARID)</span><span class="api-sig">→ CHAR 50 — Descripción del artículo</span></div>
+      <div class="api-box"><span class="api-fn">GetArtRefSalPrice(ARID)</span><span class="api-sig">→ PACKED 7,2 — Precio de venta</span></div>
+      <div class="api-box"><span class="api-fn">GetArtStockPrice(ARID)</span><span class="api-sig">→ PACKED 7,2 — Precio de stock</span></div>
+      <div class="api-box"><span class="api-fn">GetArtFam(ARID)</span><span class="api-sig">→ CHAR 3 — Código de familia</span></div>
+      <div class="api-box"><span class="api-fn">GetArtStock(ARID)</span><span class="api-sig">→ PACKED 5,0 — Stock actual</span></div>
+      <div class="api-box"><span class="api-fn">GetArtMinStock(ARID)</span><span class="api-sig">→ PACKED 5,0 — Stock mínimo</span></div>
+      <div class="api-box"><span class="api-fn">GetArtVatCode(ARID)</span><span class="api-sig">→ CHAR 1 — Código IVA</span></div>
+      <div class="api-box"><span class="api-fn">ExistArt(ARID)</span><span class="api-sig">→ N — ¿Existe el artículo?</span></div>
+      <div class="api-box"><span class="api-fn">IsArtDeleted(ARID)</span><span class="api-sig">→ N — ¿Está dado de baja?</span></div>
+      <div class="api-box"><span class="api-fn">SltArticle(ARID)</span><span class="api-sig">→ CHAR 6 — Selección interactiva</span></div>
+      <div class="api-box"><span class="api-fn">GetArtInfo(ARID)</span><span class="api-sig">→ CHAR 1520 — Info completa serializad</span></div>
+      <div class="api-box"><span class="api-fn">CloseARTICLE1()</span><span class="api-sig">Cierra el cursor del fichero</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>SAMCO · Etapa 2 – Gestión de Artículos &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a> &nbsp;|&nbsp; <a href="etapa3_clientes.html">Etapa 3: Clientes →</a></footer>
+</body>
+</html>

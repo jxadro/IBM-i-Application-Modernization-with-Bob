@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Análisis de Impacto y Trazabilidad</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.hero{padding:32px 40px 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted)}
+/* TABS */
+.tabs{display:flex;gap:0;padding:0 40px;background:#fff;border-bottom:1px solid var(--border)}
+.tab-btn{padding:12px 20px;font-size:13px;border:none;background:none;cursor:pointer;
+  color:var(--fg-muted);border-bottom:2px solid transparent;font-family:var(--font-sans);transition:all .15s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab-btn:hover{color:var(--fg)}
+/* PANELS */
+.tab-pane{display:none;padding:24px 40px}
+.tab-pane.active{display:block}
+/* SEARCH ROW */
+.search-row{display:flex;gap:10px;margin-bottom:20px;align-items:center}
+.search-row input,.search-row select{padding:7px 10px;border:1px solid var(--border);border-radius:2px;
+  font-size:13px;background:var(--gray-1);font-family:var(--font-sans)}
+.search-row input{flex:1}
+.search-row input:focus,.search-row select:focus{outline:none;border-color:var(--accent)}
+/* CARDS */
+.impact-card{background:#fff;border:1px solid var(--border);border-radius:2px;padding:16px 18px;margin-bottom:12px}
+.impact-card:hover{border-color:var(--border-strong)}
+.ic-title{font-size:14px;font-weight:700;margin-bottom:8px;font-family:var(--font-mono)}
+.ic-title span{font-family:var(--font-sans);font-weight:400;font-size:12px;color:var(--fg-muted);margin-left:8px}
+.ic-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:10px}
+.ic-section{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-muted);margin-bottom:6px}
+.tags-row{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-family:var(--font-mono);font-size:11px;padding:2px 7px;border-radius:2px;border:1px solid var(--gray-2);background:var(--gray-1)}
+.tag-pgm{background:#e8f0f7;border-color:#b8d0e8;color:var(--accent)}
+.tag-br{background:#f7ece8;border-color:#e8c4bc;color:var(--warn)}
+.tag-pf{background:#e8f7ee;border-color:#b8e8cc;color:#2e7d32}
+.tag-ent{background:#f3e8f7;border-color:#d0b8e8;color:#5c2e7d}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px}
+.badge-conf{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.badge-ncnf{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+/* MATRIX */
+.matrix-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);min-width:900px}
+th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:10px 10px;
+  background:var(--gray-1);border:1px solid var(--border);text-align:left;color:var(--fg-muted)}
+td{padding:8px 10px;border:1px solid var(--border);font-size:12px;vertical-align:top}
+td:first-child{font-family:var(--font-mono);font-weight:600;background:var(--gray-1);white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot-y{background:var(--accent)}
+.dot-n{background:transparent}
+.empty{padding:40px;text-align:center;color:var(--fg-muted)}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border);margin-top:20px}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Análisis de Impacto</span>
+  <a href="flujo_samco.html">← Flujo completo</a>
+</header>
+
+<div class="hero">
+  <h1>Análisis de Impacto y Trazabilidad</h1>
+  <p>Búsqueda cruzada bidireccional: programa ↔ entidad Db2 ↔ regla de negocio ↔ proceso funcional.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('pgm')">Por Programa</button>
+  <button class="tab-btn" onclick="showTab('ent')">Por Entidad Db2</button>
+  <button class="tab-btn" onclick="showTab('br')">Por Regla</button>
+  <button class="tab-btn" onclick="showTab('matrix')">Matriz Programa–Entidad</button>
+</div>
+
+<!-- POR PROGRAMA -->
+<div class="tab-pane active" id="tab-pgm">
+  <div class="search-row">
+    <input type="text" id="pgmSearch" placeholder="Ej: ORD200, ART300, LOG100..." oninput="renderPgm()">
+    <select id="pgmMod" onchange="renderPgm()">
+      <option value="">Todos los módulos</option>
+      <option value="ORD">Pedidos</option><option value="ART">Artículos</option>
+      <option value="CUS">Clientes</option><option value="PRO">Proveedores</option>
+      <option value="MAE">Maestros</option><option value="UTL">Utilidades</option>
+    </select>
+  </div>
+  <div id="pgmResult"></div>
+</div>
+
+<!-- POR ENTIDAD -->
+<div class="tab-pane" id="tab-ent">
+  <div class="search-row">
+    <input type="text" id="entSearch" placeholder="Ej: ORDER, CUSTOMER, ARTICLE..." oninput="renderEnt()">
+  </div>
+  <div id="entResult"></div>
+</div>
+
+<!-- POR REGLA -->
+<div class="tab-pane" id="tab-br">
+  <div class="search-row">
+    <input type="text" id="brSearch" placeholder="Ej: BR-ORD-001, cliente, IVA..." oninput="renderBr()">
+    <select id="brEst" onchange="renderBr()">
+      <option value="">Todos los estados</option>
+      <option value="CONFIRMADA">CONFIRMADA</option>
+      <option value="REGLA_NO_CONFIRMADA">REGLA_NO_CONFIRMADA</option>
+    </select>
+  </div>
+  <div id="brResult"></div>
+</div>
+
+<!-- MATRIZ -->
+<div class="tab-pane" id="tab-matrix">
+  <div class="matrix-wrap">
+    <div id="matrixResult"></div>
+  </div>
+</div>
+
+<footer>SAMCO · Análisis de Impacto &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a> &nbsp;|&nbsp; <a href="buscador_reglas.html">Buscador de reglas</a></footer>
+
+<script src="reglas_data.js"></script>
+<script src="procesos_data.js"></script>
+<script src="entidades_data.js"></script>
+<script>
+// Build cross-reference index
+const PGM_INDEX = {}; // program -> {entidades, reglas, procesos}
+
+PROCESOS.forEach(p=>{
+  p.programas.forEach(pgm=>{
+    if(!PGM_INDEX[pgm]) PGM_INDEX[pgm]={entidades:new Set(),reglas:new Set(),procesos:new Set(),modulo:p.modulo};
+    p.entidades.forEach(e=>PGM_INDEX[pgm].entidades.add(e));
+    p.reglas.forEach(r=>PGM_INDEX[pgm].reglas.add(r));
+    PGM_INDEX[pgm].procesos.add(p.id);
+  });
+});
+
+REGLAS.forEach(r=>{
+  r.programa.split(',').map(x=>x.trim()).forEach(pgm=>{
+    if(!PGM_INDEX[pgm]) PGM_INDEX[pgm]={entidades:new Set(),reglas:new Set(),procesos:new Set(),modulo:r.modulo};
+    PGM_INDEX[pgm].reglas.add(r.id);
+    r.entidad.split(',').map(x=>x.trim()).forEach(e=>PGM_INDEX[pgm].entidades.add(e));
+  });
+});
+
+const ENT_INDEX = {}; // entity -> {programas, reglas, procesos}
+ENTIDADES.forEach(e=>{
+  ENT_INDEX[e.id]={programas:new Set(),reglas:new Set(),procesos:new Set()};
+});
+REGLAS.forEach(r=>{
+  r.entidad.split(',').map(x=>x.trim()).forEach(ent=>{
+    if(!ENT_INDEX[ent]) ENT_INDEX[ent]={programas:new Set(),reglas:new Set(),procesos:new Set()};
+    ENT_INDEX[ent].reglas.add(r.id);
+    r.programa.split(',').map(x=>x.trim()).forEach(p=>ENT_INDEX[ent].programas.add(p));
+  });
+});
+PROCESOS.forEach(p=>{
+  p.entidades.forEach(ent=>{
+    if(!ENT_INDEX[ent]) ENT_INDEX[ent]={programas:new Set(),reglas:new Set(),procesos:new Set()};
+    ENT_INDEX[ent].procesos.add(p.id);
+    p.programas.forEach(pgm=>ENT_INDEX[ent].programas.add(pgm));
+  });
+});
+
+// ── TAB RENDERING ──────────────────────────────────────────────────────────
+function showTab(id){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['pgm','ent','br','matrix'][i]===id));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='matrix') renderMatrix();
+}
+
+function renderPgm(){
+  const q = document.getElementById('pgmSearch').value.toLowerCase();
+  const mod = document.getElementById('pgmMod').value;
+  const programs = Object.keys(PGM_INDEX).filter(pgm=>{
+    const ok_q = !q || pgm.toLowerCase().includes(q);
+    const ok_m = !mod || PGM_INDEX[pgm].modulo===mod;
+    return ok_q || ok_m || (!q&&!mod);
+  }).filter(pgm=> (!q||pgm.toLowerCase().includes(q)) && (!mod||PGM_INDEX[pgm].modulo===mod));
+
+  const filtered = q || mod ? programs : Object.keys(PGM_INDEX);
+  document.getElementById('pgmResult').innerHTML = filtered.length ?
+    filtered.sort().map(pgm=>{
+      const d=PGM_INDEX[pgm];
+      return `<div class="impact-card">
+        <div class="ic-title">${pgm}<span>Módulo: ${d.modulo||'—'}</span></div>
+        <div class="ic-grid">
+          <div><div class="ic-section">Entidades Db2</div><div class="tags-row">${[...d.entidades].map(e=>`<span class="tag tag-ent">${e}</span>`).join('')||'—'}</div></div>
+          <div><div class="ic-section">Reglas de Negocio</div><div class="tags-row">${[...d.reglas].map(r=>`<span class="tag tag-br">${r}</span>`).join('')||'—'}</div></div>
+          <div><div class="ic-section">Procesos Funcionales</div><div class="tags-row">${[...d.procesos].map(p=>`<span class="tag tag-pf">${p}</span>`).join('')||'—'}</div></div>
+        </div></div>`;
+    }).join('') : '<div class="empty">No se encontraron programas.</div>';
+}
+
+function renderEnt(){
+  const q = document.getElementById('entSearch').value.toLowerCase();
+  const entities = Object.keys(ENT_INDEX).filter(e=>!q||e.toLowerCase().includes(q));
+  document.getElementById('entResult').innerHTML = entities.length ?
+    entities.sort().map(ent=>{
+      const d=ENT_INDEX[ent];
+      return `<div class="impact-card">
+        <div class="ic-title">${ent}</div>
+        <div class="ic-grid">
+          <div><div class="ic-section">Programas</div><div class="tags-row">${[...d.programas].sort().map(p=>`<span class="tag tag-pgm">${p}</span>`).join('')||'—'}</div></div>
+          <div><div class="ic-section">Reglas de Negocio</div><div class="tags-row">${[...d.reglas].map(r=>`<span class="tag tag-br">${r}</span>`).join('')||'—'}</div></div>
+          <div><div class="ic-section">Procesos Funcionales</div><div class="tags-row">${[...d.procesos].map(p=>`<span class="tag tag-pf">${p}</span>`).join('')||'—'}</div></div>
+        </div></div>`;
+    }).join('') : '<div class="empty">No se encontraron entidades.</div>';
+}
+
+function renderBr(){
+  const q = document.getElementById('brSearch').value.toLowerCase();
+  const est = document.getElementById('brEst').value;
+  const res = REGLAS.filter(r=>(!q||[r.id,r.nombre,r.desc,r.entidad,r.programa].join(' ').toLowerCase().includes(q))&&(!est||r.estado===est));
+  document.getElementById('brResult').innerHTML = res.length ?
+    res.map(r=>`<div class="impact-card">
+      <div class="ic-title">${r.id} <span class="badge ${r.estado==='CONFIRMADA'?'badge-conf':'badge-ncnf'}">${r.estado}</span></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${r.nombre}</div>
+      <div style="font-size:12px;color:var(--fg-muted);margin-bottom:8px">${r.desc}</div>
+      <div class="ic-grid">
+        <div><div class="ic-section">Entidades</div><div class="tags-row"><span class="tag tag-ent">${r.entidad}</span></div></div>
+        <div><div class="ic-section">Programas</div><div class="tags-row">${r.programa.split(',').map(p=>`<span class="tag tag-pgm">${p.trim()}</span>`).join('')}</div></div>
+        <div><div class="ic-section">Módulo</div><span class="tag">${r.modulo}</span></div>
+      </div></div>`).join('') : '<div class="empty">No se encontraron reglas.</div>';
+}
+
+function renderMatrix(){
+  const pgms = Object.keys(PGM_INDEX).sort().slice(0,30);
+  const ents = [...new Set(REGLAS.map(r=>r.entidad.split(',').map(x=>x.trim())).flat())].sort();
+  let html=`<table><thead><tr><th>Programa</th>${ents.map(e=>`<th style="writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;max-width:24px">${e}</th>`).join('')}</tr></thead><tbody>`;
+  pgms.forEach(pgm=>{
+    const d=PGM_INDEX[pgm];
+    html+=`<tr><td>${pgm}</td>${ents.map(e=>`<td style="text-align:center">${d.entidades.has(e)?'<span class="dot dot-y" title="'+pgm+' usa '+e+'"></span>':'<span class="dot dot-n"></span>'}</td>`).join('')}</tr>`;
+  });
+  html+=`</tbody></table>`;
+  document.getElementById('matrixResult').innerHTML=html;
+}
+
+// initial renders
+renderPgm();
+renderEnt();
+renderBr();
+</script>
+</body>
+</html>

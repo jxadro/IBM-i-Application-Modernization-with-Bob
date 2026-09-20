@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Diagrama Entidad-Relación Interactivo</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--gray-2:#e8e8e8;--gray-3:#d4d4d4;
+  --accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5;height:100vh;display:flex;flex-direction:column}
+.site-header{flex-shrink:0;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;height:48px;z-index:10}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.main{flex:1;display:flex;min-height:0}
+/* GRAPH */
+.graph-col{flex:1;position:relative;min-width:0}
+svg#er{width:100%;height:100%;cursor:default}
+.node-group{cursor:pointer}
+.node-circle{fill:#fff;stroke:var(--border-strong);stroke-width:1.5;transition:fill .15s}
+.node-circle.hi{fill:var(--border-strong)}
+.node-circle.dim{opacity:.25}
+.node-circle.dashed{stroke-dasharray:4 2}
+.node-label{font-family:var(--font-mono);font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central;
+  pointer-events:none;fill:var(--fg);transition:fill .15s}
+.node-label.hi{fill:#fff}
+.node-label.dim{opacity:.25}
+.node-pct{font-family:var(--font-mono);font-size:9px;text-anchor:middle;dominant-baseline:central;
+  fill:var(--fg-muted);pointer-events:none;transition:opacity .15s}
+.node-pct.dim{opacity:.1}
+.edge{stroke:var(--gray-3);stroke-width:1.4;fill:none;transition:opacity .15s}
+.edge.hi{stroke:var(--border-strong);stroke-width:2}
+.edge.dim{opacity:.1}
+.edge.dashed{stroke-dasharray:5 3}
+/* SIDE PANEL */
+.side-panel{width:340px;flex-shrink:0;border-left:1px solid var(--border);background:#fff;overflow-y:auto;display:flex;flex-direction:column}
+.side-search{padding:12px 16px;border-bottom:1px solid var(--border)}
+.side-search input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:2px;
+  font-size:12px;font-family:var(--font-sans);background:var(--gray-1)}
+.side-search input:focus{outline:none;border-color:var(--accent)}
+.side-content{padding:16px;flex:1}
+.sc-hint{font-size:12px;color:var(--fg-muted);padding:20px 0;text-align:center}
+.sc-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.sc-subtitle{font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);margin-bottom:12px}
+.sc-section{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--fg-muted);margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+.sc-section:first-of-type{border-top:none;margin-top:0;padding-top:0}
+.field-row{display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid var(--gray-1);font-size:12px}
+.field-name{font-family:var(--font-mono);font-weight:600;flex:1}
+.field-type{font-family:var(--font-mono);font-size:10px;color:var(--fg-muted)}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:9px;padding:0 4px;border-radius:2px}
+.badge-pk{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.badge-fk{background:#e8f0f7;color:var(--accent);border:1px solid #b8d0e8}
+.rel-row{font-size:12px;padding:4px 0;border-bottom:1px solid var(--gray-1);font-family:var(--font-mono)}
+.rel-card{margin:4px 0;font-size:11px;line-height:1.5}
+.rel-dest{font-weight:700;color:var(--accent)}
+.rel-dashed-label{font-size:10px;color:var(--fg-muted);font-style:italic}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Diagrama Entidad-Relación</span>
+  <a href="flujo_samco.html">← Flujo completo</a>
+</header>
+
+<div class="main">
+  <div class="graph-col">
+    <svg id="er" viewBox="0 0 820 620" xmlns="http://www.w3.org/2000/svg">
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+  <div class="side-panel">
+    <div class="side-search">
+      <input type="text" id="searchEnt" placeholder="Buscar entidad..." oninput="searchEntity()">
+    </div>
+    <div class="side-content" id="sideContent">
+      <div class="sc-hint">Haz clic en una entidad del grafo para ver su ficha técnica completa.</div>
+    </div>
+  </div>
+</div>
+
+<script src="entidades_data.js"></script>
+<script>
+const CX=400, CY=300, R=220;
+const RNODE=44;
+const MAX_PGM = Math.max(...ENTIDADES.map(e=>e.nprogramas));
+
+let selected = null;
+
+// ── Layout circular ────────────────────────────────────────────────────────
+const N = ENTIDADES.length;
+ENTIDADES.forEach((e,i)=>{
+  const angle = (2*Math.PI*i)/N - Math.PI/2;
+  e._x = CX + R*Math.cos(angle);
+  e._y = CY + R*Math.sin(angle);
+});
+
+// ── Render edges ───────────────────────────────────────────────────────────
+const edgesG = document.getElementById('edges');
+const edgeMap = {}; // id1+'-'+id2 -> svg line element
+
+ENTIDADES.forEach(e=>{
+  e.relaciones.forEach(rel=>{
+    const dest = ENTIDADES.find(x=>x.id===rel.destino);
+    if(!dest) return;
+    const key = [e.id,dest.id].sort().join('--');
+    if(edgeMap[key]) return; // ya dibujado
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', e._x); line.setAttribute('y1', e._y);
+    line.setAttribute('x2', dest._x); line.setAttribute('y2', dest._y);
+    line.setAttribute('class', `edge${rel.confirmada?'':' dashed'}`);
+    line.dataset.a = e.id; line.dataset.b = dest.id;
+    edgesG.appendChild(line);
+    edgeMap[key] = line;
+  });
+});
+
+// ── Render nodes ───────────────────────────────────────────────────────────
+const nodesG = document.getElementById('nodes');
+ENTIDADES.forEach(e=>{
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','node-group');
+  g.dataset.id = e.id;
+  g.addEventListener('click',()=>selectEntity(e.id));
+  g.addEventListener('mouseenter',()=>highlightEntity(e.id));
+  g.addEventListener('mouseleave',()=>{ if(!selected) clearHighlight(); });
+
+  const r = RNODE * (0.72 + 0.28*(e.nprogramas/MAX_PGM));
+  const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  circle.setAttribute('cx', e._x); circle.setAttribute('cy', e._y); circle.setAttribute('r', r);
+  circle.setAttribute('class', `node-circle${e.confirmada?'':' dashed'}`);
+  circle.dataset.id = e.id;
+
+  const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+  label.setAttribute('x', e._x); label.setAttribute('y', e._y - 6);
+  label.setAttribute('class','node-label'); label.dataset.id = e.id;
+  label.textContent = e.id;
+
+  const pct = document.createElementNS('http://www.w3.org/2000/svg','text');
+  pct.setAttribute('x', e._x); pct.setAttribute('y', e._y + 10);
+  pct.setAttribute('class','node-pct'); pct.dataset.id = e.id;
+  pct.textContent = e.tipo;
+
+  g.appendChild(circle); g.appendChild(label); g.appendChild(pct);
+  nodesG.appendChild(g);
+});
+
+// ── Highlight logic ────────────────────────────────────────────────────────
+function getConnected(id){
+  const ent = ENTIDADES.find(e=>e.id===id);
+  const connected = new Set([id]);
+  ent.relaciones.forEach(r=>connected.add(r.destino));
+  ENTIDADES.forEach(e=>{ if(e.relaciones.some(r=>r.destino===id)) connected.add(e.id); });
+  return connected;
+}
+
+function highlightEntity(id){
+  const connected = getConnected(id);
+  document.querySelectorAll('.node-circle,.node-label,.node-pct').forEach(el=>{
+    el.classList.remove('hi','dim');
+    if(el.dataset.id===id) el.classList.add('hi');
+    else if(!connected.has(el.dataset.id)) el.classList.add('dim');
+  });
+  document.querySelectorAll('.edge').forEach(el=>{
+    el.classList.remove('hi','dim');
+    const a=el.dataset.a, b=el.dataset.b;
+    if((a===id||b===id)) el.classList.add('hi');
+    else if(!connected.has(a)||!connected.has(b)) el.classList.add('dim');
+  });
+}
+
+function clearHighlight(){
+  document.querySelectorAll('.node-circle,.node-label,.node-pct,.edge').forEach(el=>el.classList.remove('hi','dim'));
+}
+
+// ── Select entity ──────────────────────────────────────────────────────────
+function selectEntity(id){
+  selected = id;
+  highlightEntity(id);
+  renderPanel(id);
+}
+
+function renderPanel(id){
+  const e = ENTIDADES.find(x=>x.id===id);
+  if(!e){ document.getElementById('sideContent').innerHTML='<div class="sc-hint">Entidad no encontrada.</div>'; return; }
+  let html = `<div class="sc-title">${e.id}</div>`;
+  html += `<div class="sc-subtitle">${e.tipo} · ${e.fuente}</div>`;
+  html += `<p style="font-size:12px;color:var(--fg-muted);margin-bottom:4px">${e.descripcion}</p>`;
+  html += `<div style="font-size:11px;margin-bottom:4px">Programas que la usan: <strong>${e.nprogramas}</strong></div>`;
+
+  html += `<div class="sc-section">Campos</div>`;
+  e.campos.forEach(c=>{
+    html += `<div class="field-row">
+      <span class="field-name">${c.nombre}${c.pk?'&nbsp;<span class="badge badge-pk">PK</span>':''}${c.fk?`&nbsp;<span class="badge badge-fk">FK→${c.fk}</span>`:''}</span>
+      <span class="field-type">${c.tipo||'—'}</span>
+    </div>`;
+  });
+
+  if(e.relaciones.length){
+    html += `<div class="sc-section">Relaciones</div>`;
+    e.relaciones.forEach(r=>{
+      html += `<div class="rel-card">
+        <span class="rel-dest">${r.destino}</span>
+        <span style="font-size:10px;color:var(--fg-muted)"> [${r.card}]</span>
+        ${!r.confirmada?'<span class="rel-dashed-label"> · candidata</span>':''}<br>
+        <span style="color:var(--fg-muted)">via </span><code style="font-family:var(--font-mono);font-size:10px">${r.campo_orig} → ${r.campo_dest}</code>
+      </div>`;
+    });
+  }
+
+  // entrantes
+  const entrantes = ENTIDADES.filter(x=>x.relaciones.some(r=>r.destino===id));
+  if(entrantes.length){
+    html += `<div class="sc-section">Relaciones entrantes</div>`;
+    entrantes.forEach(ent=>{
+      const rel = ent.relaciones.find(r=>r.destino===id);
+      html += `<div class="rel-card"><span class="rel-dest">${ent.id}</span> → <strong>${id}</strong><br>
+        <span style="color:var(--fg-muted)">via </span><code style="font-family:var(--font-mono);font-size:10px">${rel.campo_orig} → ${rel.campo_dest}</code></div>`;
+    });
+  }
+
+  document.getElementById('sideContent').innerHTML = html;
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────
+function searchEntity(){
+  const q = document.getElementById('searchEnt').value.toLowerCase().trim();
+  if(!q){ clearHighlight(); selected=null; document.getElementById('sideContent').innerHTML='<div class="sc-hint">Haz clic en una entidad del grafo para ver su ficha técnica completa.</div>'; return; }
+  const match = ENTIDADES.find(e=>e.id.toLowerCase().includes(q));
+  if(match){ selectEntity(match.id); }
+}
+
+// Click fuera de nodo → deselect
+document.getElementById('er').addEventListener('click', e=>{
+  if(e.target.tagName==='svg'||e.target.tagName==='g'&&!e.target.closest('.node-group')){
+    selected=null; clearHighlight();
+  }
+});
+</script>
+</body>
+</html>

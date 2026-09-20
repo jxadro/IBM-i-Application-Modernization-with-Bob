@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Etapa 4 – Proveedores | Etapa 5 – Maestros | Etapa 6 – Utilidades</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.tabs{display:flex;gap:0;padding:0 40px;background:#fff;border-bottom:1px solid var(--border)}
+.tab-btn{padding:12px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--fg-muted);
+  border-bottom:2px solid transparent;font-family:var(--font-sans);transition:all .15s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab-pane{display:none;padding:28px 40px}
+.tab-pane.active{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.section{background:#fff;border:1px solid var(--border);border-radius:2px;padding:20px 22px}
+.section.full{grid-column:1/-1}
+.section h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);margin-bottom:14px}
+.rule-card{border:1px solid var(--border);border-radius:2px;padding:11px 13px;margin-bottom:8px}
+.rc-id{font-family:var(--font-mono);font-size:10px;color:var(--warn);margin-bottom:3px}
+.rc-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.rc-desc{font-size:12px;color:var(--fg-muted)}
+.pgm-card{border:1px solid var(--border);padding:10px 14px;margin-bottom:8px;border-radius:2px}
+.pc-name{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.pc-desc{font-size:12px;color:var(--fg-muted)}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;margin-right:4px}
+.badge-conf{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.badge-ncnf{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.api-box{background:var(--gray-1);border:1px solid var(--border);border-radius:2px;padding:10px 12px;margin-bottom:7px;font-family:var(--font-mono);font-size:11px}
+.api-fn{font-weight:700;color:var(--accent);display:block;margin-bottom:1px}
+.api-sig{color:var(--fg-muted)}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Etapas 4–5–6</span>
+  <a href="flujo_samco.html">← Volver al flujo completo</a>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('pro')">Etapa 4 · Proveedores</button>
+  <button class="tab-btn" onclick="showTab('mae')">Etapa 5 · Datos Maestros</button>
+  <button class="tab-btn" onclick="showTab('utl')">Etapa 6 · Utilidades</button>
+</div>
+
+<!-- ETAPA 4: PROVEEDORES -->
+<div class="tab-pane active" id="tab-pro">
+  <div class="section">
+    <h2>Reglas de Negocio</h2>
+    <div class="rule-card"><div class="rc-id">BR-PRO-001 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Número de proveedor único (PRID, 5 dígitos packed)</div>
+      <div class="rc-desc">PRID es la clave primaria de PROVIDER. Unicidad garantizada por el fichero físico.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-PRO-002 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Precio proveedor (APIPRI) independiente del precio de venta</div>
+      <div class="rc-desc">ARTIPROV.APIPRI almacena el precio de compra del proveedor, sin relación con ARTICLE.ARSALEPR. Relación M:N entre artículos y proveedores.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-PRO-003 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Baja lógica via PRDEL='X'</div>
+      <div class="rc-desc">Proveedores no se eliminan físicamente. PRDEL referenciado en SAMREF como DLCODE.</div></div>
+  </div>
+  <div class="section">
+    <h2>Programas IBM i</h2>
+    <div class="pgm-card"><div class="pc-name">PRO200 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE</span></div>
+      <div class="pc-desc">Lista de proveedores con subfichero. Accede a PROVIDE1 (LF por nombre). Llama a PRO202/PRO203 para mantenimiento.</div></div>
+    <div class="pgm-card"><div class="pc-name">PRO202 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLRPGLE</span></div>
+      <div class="pc-desc">Mantenimiento de datos del proveedor con SQL embebido: nombre, contacto, dirección, VAT, email, país.</div></div>
+    <div class="pgm-card"><div class="pc-name">PRO203 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.SQLRPGLE</span></div>
+      <div class="pc-desc">Detalle del proveedor y gestión de artículos asignados (ARTIPROV). Permite añadir/modificar relaciones artículo-proveedor con APIPRI.</div></div>
+    <div class="pgm-card"><div class="pc-name">PRO300 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE (módulo FPROVIDER)</span></div>
+      <div class="pc-desc">Módulo de servicio del programa FPROVIDER. Exporta funciones de acceso a PROVIDER.</div></div>
+  </div>
+</div>
+
+<!-- ETAPA 5: DATOS MAESTROS -->
+<div class="tab-pane" id="tab-mae">
+  <div class="section">
+    <h2>Familias de Artículos (FAMILLY)</h2>
+    <div class="rule-card"><div class="rc-id">BR-MAE-001 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Código familia (FAID) de 3 caracteres, único</div>
+      <div class="rc-desc">FAMILLY declara UNIQUE. FAM300/FAM301 gestionan el ciclo de vida de familias.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-MAE-002 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Tasa IVA por familia (FAVATCD) referencia VATDEF</div>
+      <div class="rc-desc">FAVATCD es el código IVA por defecto que hereda el artículo al asignarse a la familia. CLCVat() lo usa para el cálculo en pedidos.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-MAE-004 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Baja lógica en familias via FADEL='X'</div>
+      <div class="rc-desc">No se eliminan familias con artículos activos. FADEL marca la baja lógica.</div></div>
+    <h2 style="margin-top:20px">Países, Parámetros e IVA</h2>
+    <div class="rule-card"><div class="rc-id">BR-MAE-003 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Código país (COID) de 2 chars, ISO-3166</div>
+      <div class="rc-desc">COUNTRY tiene campos adicionales COISO (alpha-3), COISO5, COISO1 para variantes. COU300/COU301 gestionan el maestro.</div></div>
+    <div class="pgm-card" style="margin-top:12px"><div class="pc-name">API del Servicio FVAT</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+        <div class="api-box"><span class="api-fn">GetVATRate(VATCODE)</span><span class="api-sig">→ PACKED 4,2 — Tasa %</span></div>
+        <div class="api-box"><span class="api-fn">GetVATDesc(VATCODE)</span><span class="api-sig">→ CHAR 20 — Descripción</span></div>
+        <div class="api-box"><span class="api-fn">ExistVATRate(VATCODE)</span><span class="api-sig">→ N — ¿Existe?</span></div>
+        <div class="api-box"><span class="api-fn">CLCVat(VATCODE, NetValue)</span><span class="api-sig">→ PACKED 9,2 — Importe IVA</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <h2>Programas IBM i</h2>
+    <div class="pgm-card"><div class="pc-name">FAM300 / FAM301 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE</span></div>
+      <div class="pc-desc">FAM300: módulo de servicio FFAMILLY. FAM301: pantalla de mantenimiento de familias vía FAM301D.DSPF. Valida código IVA con ExistVATRate().</div></div>
+    <div class="pgm-card"><div class="pc-name">COU300 / COU301 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE</span></div>
+      <div class="pc-desc">COU300: lista de países (COU200D). COU301: mantenimiento (COU301D). Módulo FCOUNTRY provee GetCountry* functions.</div></div>
+    <div class="pgm-card"><div class="pc-name">PAR200 / PAR300 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE</span></div>
+      <div class="pc-desc">PAR200: pantalla de mantenimiento de parámetros (PAR200D). PAR300: módulo de servicio FPARAMETER para lectura de parámetros.</div></div>
+    <div class="pgm-card"><div class="pc-name">PAR201 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.CLLE</span></div>
+      <div class="pc-desc">Programa CL de procesamiento batch de parámetros. Crea/actualiza parámetros en la tabla PARAMETER desde jobs planificados.</div></div>
+  </div>
+</div>
+
+<!-- ETAPA 6: UTILIDADES -->
+<div class="tab-pane" id="tab-utl">
+  <div class="section">
+    <h2>Log de Aplicación</h2>
+    <div class="rule-card"><div class="rc-id">BR-UTL-001 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Log: usuario + timestamp + mensaje (≤500 chars)</div>
+      <div class="rc-desc">LOG300.AddLogEntry() construye la entrada: "User: X * Date: TS * Msg: M ***". Se escribe en user space SAMLOG.</div></div>
+    <div class="rule-card"><div class="rc-id">BR-UTL-002 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Log en user space SAMLOG (*LIBL)</div>
+      <div class="rc-desc">LOG300 usa API IBM i RTVUSRSPCPTR sobre 'SAMLOG    *LIBL'. Escritura en posición incremental (pos += len(data2)).</div></div>
+    <h2 style="margin-top:20px">Fechas, Texto y XML</h2>
+    <div class="pgm-card"><div class="pc-name">DAT001 / DAT002 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE</span></div>
+      <div class="pc-desc">Utilidades de fecha para conversión y manipulación de fechas IBM i. DAT002 especializado en conversiones de formato.</div></div>
+    <div class="pgm-card"><div class="pc-name">ISOTODATE / ISOTODATE4 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLUDF</span></div>
+      <div class="pc-desc">UDFs SQL en QSQLSRC para convertir fechas ISO a formato DATE de Db2. ISOTODATE4 maneja años de 4 dígitos.</div></div>
+    <div class="pgm-card"><div class="pc-name">TXT001 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE (módulo TXT)</span></div>
+      <div class="pc-desc">Utilidades de procesamiento de texto: cadenas, padding, limpieza. Exportado como servicio TXT en SAMPLE.BNDDIR.</div></div>
+    <div class="pgm-card"><div class="pc-name">XML001 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE (módulo XML)</span></div>
+      <div class="pc-desc">Generación y parseo de XML para intercambio de datos con sistemas externos. Integración con IFS para leer/escribir stream files.</div></div>
+  </div>
+  <div class="section">
+    <h2>Programas de Log</h2>
+    <div class="pgm-card"><div class="pc-name">LOG300 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE (módulo LOG)</span></div>
+      <div class="pc-desc">Módulo de servicio del srvpgm LOG. Usa XREF SAMLOG *USRSPC. Función AddLogEntry(entry: CHAR 500). Inicialización lazy via flag 'inz'.</div></div>
+    <div class="pgm-card"><div class="pc-name">LOG100 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.RPGLE</span></div>
+      <div class="pc-desc">Visor y mantenimiento del log de aplicación. Permite consultar las entradas de SAMLOG desde la interfaz 5250.</div></div>
+    <h2 style="margin-top:20px">Objetos SQL y Arquitectura</h2>
+    <div class="pgm-card"><div class="pc-name">ART801 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLPRC — Stored Procedure</span></div>
+      <div class="pc-desc">Procedimiento almacenado SQL para procesamiento de artículos. Puede invocarse desde aplicaciones web/REST o batch.</div></div>
+    <div class="pgm-card"><div class="pc-name">ORDERCUS <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.VIEW — Vista SQL</span></div>
+      <div class="pc-desc">JOIN consolidado de ORDER + CUSTOMER. Expone todos los campos de pedido con datos del cliente para informes y REST APIs.</div></div>
+    <div class="pgm-card"><div class="pc-name">ORD701 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLTRG — Trigger SQL</span></div>
+      <div class="pc-desc">AFTER INSERT ON ORDER: actualiza CULASTORD en CUSTOMER. Único punto de actualización automática de fecha de último pedido.</div></div>
+  </div>
+</div>
+
+<footer>SAMCO · Etapas 4–5–6 &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a> &nbsp;|&nbsp; <a href="etapa3_clientes.html">← Etapa 3</a></footer>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['pro','mae','utl'][i]===id));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+}
+// anchor routing
+const h=location.hash.replace('#','');
+if(['pro','mae','utl'].includes(h)) showTab(h);
+</script>
+</body>
+</html>

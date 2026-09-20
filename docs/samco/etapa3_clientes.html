@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAMCO · Etapa 3 – Gestión de Clientes</title>
+<style>
+:root{
+  --bg:#f7f7f5;--fg:#101010;--fg-muted:#757575;
+  --border:#e3e3e3;--border-strong:#101010;
+  --gray-1:#f2f2f2;--accent:#174a5b;--warn:#8b3a32;
+  --font-sans:"Helvetica Now Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:"Noto Sans Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.5}
+.site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;height:48px}
+.site-header .brand{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--accent)}
+.site-header .breadcrumb{font-size:12px;color:var(--fg-muted);flex:1}
+.site-header a{font-size:12px;color:var(--accent);text-decoration:none}
+.site-header a:hover{text-decoration:underline}
+.hero{padding:36px 40px 20px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.hero p{font-size:13px;color:var(--fg-muted)}
+.content{padding:28px 40px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.section{background:#fff;border:1px solid var(--border);border-radius:2px;padding:20px 22px}
+.section h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted);margin-bottom:14px}
+.rule-card{border:1px solid var(--border);border-radius:2px;padding:11px 13px;margin-bottom:8px}
+.rc-id{font-family:var(--font-mono);font-size:10px;color:var(--warn);margin-bottom:3px}
+.rc-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.rc-desc{font-size:12px;color:var(--fg-muted)}
+.pgm-card{border:1px solid var(--border);padding:10px 14px;margin-bottom:8px;border-radius:2px}
+.pc-name{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.pc-desc{font-size:12px;color:var(--fg-muted)}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;padding:1px 5px;border-radius:2px;margin-right:4px}
+.badge-conf{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.api-box{background:var(--gray-1);border:1px solid var(--border);border-radius:2px;padding:11px 13px;margin-bottom:8px;font-family:var(--font-mono);font-size:11px}
+.api-fn{font-weight:700;color:var(--accent);display:block;margin-bottom:2px}
+.api-sig{color:var(--fg-muted)}
+.flow-note{background:#f0f7fa;border:1px solid #b8d0e8;border-radius:2px;padding:14px;margin-bottom:14px;font-size:13px}
+.flow-note strong{color:var(--accent)}
+footer{padding:24px 40px;font-size:11px;color:var(--fg-muted);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <span class="brand">IBM i · SAMCO</span>
+  <span class="breadcrumb">SAMCO &nbsp;·&nbsp; Etapa 3 &nbsp;·&nbsp; Gestión de Clientes</span>
+  <a href="flujo_samco.html">← Volver al flujo completo</a>
+</header>
+
+<div class="hero">
+  <h1>Etapa 3 — Gestión de Clientes</h1>
+  <p>Alta y mantenimiento de clientes con numeración automática (CUSSEQ), validación de país, gestión de crédito y acceso directo al historial de pedidos. Servicio FCUSTOMER.</p>
+</div>
+
+<div class="content">
+  <div class="section">
+    <h2>Reglas de Negocio</h2>
+
+    <div class="flow-note">
+      <strong>Flujo de integración:</strong> CUS200 (lista) → CUS301 (mantenimiento/alta). Desde CUS200, opción 5 abre ORD200 con el cliente filtrado.
+    </div>
+
+    <div class="rule-card"><div class="rc-id">BR-CUS-001 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Número de cliente autogenerado por secuencia SQL CUSSEQ</div>
+      <div class="rc-desc">CUS200/CUS301 consume el siguiente valor de CUSSEQ (QSQLSRC/CUSSEQ.SQLSEQ) para asignar CUID al nuevo cliente.</div></div>
+
+    <div class="rule-card"><div class="rc-id">BR-CUS-002 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">País del cliente (CUCOUN) debe existir en COUNTRY</div>
+      <div class="rc-desc">CUS200 usa /copy qprotosrc/country. CUS301 valida el código de 2 chars contra COUNTRY.COID.</div></div>
+
+    <div class="rule-card"><div class="rc-id">BR-CUS-003 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Crédito disponible = CULIMCRE – CUCREDIT</div>
+      <div class="rc-desc">CULIMCRE es el límite autorizado; CUCREDIT el saldo utilizado. La diferencia determina si se puede crear un nuevo pedido. Expuesto via GetCusLimCredit() y GetCusCredit().</div></div>
+
+    <div class="rule-card"><div class="rc-id">BR-CUS-004 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">Baja lógica via CUDEL='X'</div>
+      <div class="rc-desc">IsCusDeleted(CUID) verifica el campo CUDEL. Los clientes dados de baja no pueden crear pedidos.</div></div>
+
+    <div class="rule-card"><div class="rc-id">BR-CUS-005 &nbsp;<span class="badge badge-conf">CONFIRMADA</span></div>
+      <div class="rc-title">CULASTORD actualizado automáticamente por trigger ORD701</div>
+      <div class="rc-desc">Ningún programa de clientes actualiza CULASTORD. El trigger SQL ORD701 (AFTER INSERT ORDER) lo hace automáticamente con ordate del nuevo pedido.</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Programas IBM i</h2>
+
+    <div class="pgm-card"><div class="pc-name">CUS200 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.PGM.SQLRPGLE</span></div>
+      <div class="pc-desc">Programa principal de lista de clientes con subfichero. Accede a CUSTOME2 (LF por país) y CUSTOME1 (LF por nombre). Importa prototipos de COUNTRY via /copy qprotosrc/country. Llama a ORD200 para pedidos del cliente.</div></div>
+
+    <div class="pgm-card"><div class="pc-name">CUS301 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.SQLRPGLE</span></div>
+      <div class="pc-desc">Mantenimiento completo de cliente. Gestiona: número de cliente (CUSSEQ), todos los campos de contacto y dirección, país (con validación), límite de crédito y estado. SQL embebido para operaciones sobre CUSTOMER.</div></div>
+
+    <div class="pgm-card"><div class="pc-name">CUS300 <span style="font-weight:400;font-size:10px;color:var(--fg-muted)">.RPGLE (módulo FCUSTOMER)</span></div>
+      <div class="pc-desc">Módulo de servicio del programa FCUSTOMER. Exporta todas las funciones GetCus* / ExistCus / IsCusDeleted / sltcustomer / CloseCUSTOME1.</div></div>
+
+    <h2 style="margin-top:20px">API del Servicio FCUSTOMER</h2>
+    <div class="api-box"><span class="api-fn">GetCusName(CUID)</span><span class="api-sig">→ CHAR 30 — Nombre del cliente</span></div>
+    <div class="api-box"><span class="api-fn">GetCusPhone(CUID)</span><span class="api-sig">→ CHAR 15 — Teléfono</span></div>
+    <div class="api-box"><span class="api-fn">GetCusMail(CUID)</span><span class="api-sig">→ CHAR 50 — Email</span></div>
+    <div class="api-box"><span class="api-fn">GetCusCountry(CUID)</span><span class="api-sig">→ CHAR 2 — Código de país</span></div>
+    <div class="api-box"><span class="api-fn">GetCusLimCredit(CUID)</span><span class="api-sig">→ PACKED 9,2 — Límite de crédito</span></div>
+    <div class="api-box"><span class="api-fn">GetCusCredit(CUID)</span><span class="api-sig">→ PACKED 9,2 — Crédito utilizado</span></div>
+    <div class="api-box"><span class="api-fn">ExistCus(CUID)</span><span class="api-sig">→ N — ¿Existe el cliente?</span></div>
+    <div class="api-box"><span class="api-fn">IsCusDeleted(CUID)</span><span class="api-sig">→ N — ¿Está dado de baja?</span></div>
+    <div class="api-box"><span class="api-fn">sltcustomer(CUID)</span><span class="api-sig">→ PACKED 5,0 — Selección interactiva</span></div>
+    <div class="api-box"><span class="api-fn">CloseCUSTOME1()</span><span class="api-sig">Cierra el cursor del fichero</span></div>
+  </div>
+</div>
+
+<footer>SAMCO · Etapa 3 – Gestión de Clientes &nbsp;|&nbsp; <a href="flujo_samco.html">← Flujo completo</a> &nbsp;|&nbsp; <a href="etapa1_pedidos.html">← Etapa 1: Pedidos</a> &nbsp;|&nbsp; <a href="etapa4_proveedores.html">Etapa 4: Proveedores →</a></footer>
+</body>
+</html>

@@ -19,3 +19,8 @@
 1. Add/modify field → update `SAMREF.PF` first, then recompile affected PFs.
 2. Add procedure to service program → update prototype in `QPROTOSRC/<entity>.RPGLEINC`, then recompile module, rebind SRVPGM, recompile all caller programs.
 3. Add new program with DB access → declare all file dependencies in `Rules.mk` before running `makei build`.
+4. Add a new SQL object (view, UDF, trigger, sequence) → add an entry in `QSQLSRC/Rules.mk` with the correct `.FILE`, `.PGM`, or `.DTAARA` target suffix.
+5. Add `SAMPLE.BNDDIR` dependency to a new SRVPGM → also add the SRVPGM to the `ADDBNDDIRE` list in `QBNDSRC/SAMPLE.BNDDIR` and to `QBNDSRC/Rules.mk`.
+
+## CCSID Pitfall
+- `QRPGLESRC/` uses `tgtCcsid: 297` (French EBCDIC) while `QCLSRC/` uses `500` (International EBCDIC). A new subdirectory without its own `.ibmi.json` inherits the nearest parent's CCSID — always add `.ibmi.json` to new language-specific directories.

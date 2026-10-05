@@ -11,6 +11,8 @@
 - **Interactive HTML portal** (Spanish): `docs/samco/` — entry at `docs/samco/flujo_samco.html`. Data files: `reglas_data.js`, `procesos_data.js`, `entidades_data.js`, `campos_data.js`.
 - **Business rules** use ID format `BR-SAM-NNN`; **functional processes** use `PF-SAM-NNN`.
 - `docs/ART200-documentation.md` and `docs/ART300_BusinessRules.md` contain detailed per-program documentation for the article module.
+- `SAMCO/QSQLSRC/readme.md` explains SQL objects (views, triggers, UDFs, sequences) — the SQL layer coexists with DDS files.
+- `SAMCO/QPROTOSRC/README.md` lists all exported procedure signatures per service program.
 
 ## IBM i Terminology to Use
 - In QSYS context: *libraries*, *source files*, *members* (not folders/files).

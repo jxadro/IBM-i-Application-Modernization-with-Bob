@@ -21,3 +21,6 @@
 ## Rules.mk Dependencies
 - Every new `.PGM` or `.MODULE` target in a `Rules.mk` **must** explicitly list all file, SRVPGM, and BNDDIR dependencies — TOBi does not auto-discover them.
 - To add a new service program dependency to a program, add it to both the `Rules.mk` dependency line AND the corresponding `.ILEPGM` `BNDSRVPGM()` parameter.
+- A custom inline CL recipe (`cl "CPYF ..."`) is valid in `Rules.mk` — see `QDDSSRC/Rules.mk` TMPDETORD.FILE target as the canonical example.
+- Modules in `QILESRC/Rules.mk` depend on modules declared in `QRPGLESRC/Rules.mk`; build order is controlled by the `SUBDIRS` list in `SAMCO/Rules.mk` — `QILESRC` must appear after `QRPGLESRC`.
+- `$(d)/` in a dependency path means the file is relative to the current directory (used in `common/Rules.mk` for SAMREF).
